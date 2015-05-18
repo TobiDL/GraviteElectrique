@@ -1,0 +1,113 @@
+package objets.graphiques;
+
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Line2D;
+/**
+ *  Classe permettant de creer les vecteurs
+ * @author Edouard
+ * @version 13/02/14
+ */
+public class VecteurGraphique {
+
+	private double norme;
+	private double origX;
+	private double origY;
+	private double orientation; //angle en radians, a partir de l'origine du vecteur
+	private double longPointe = 20; //longueur des deux traits formant la pointe de la fleche
+	private double rotPointe = 0.3; //angle entre les traits de tete et la fleche, en radians
+	private Color couleur;
+	/**
+	 * Classe copiée d'un mini-projet de la session antérieure
+	 * @param  double origX
+	 * @param  double origY
+	 * @param  double norme
+	 * @param  double orientation (rad)
+	 */
+	public VecteurGraphique(double origX, double origY, double norme, double orientation) {
+		this.origX = origX;
+		this.origY = origY;
+		this.norme = norme;
+		this.orientation = orientation;
+		couleur=Color.green;
+	}//fin constructeur
+
+	/**
+	 * Methode permettatn de dessiner l'objet vecteur graphique
+	 * @param Graphics g2d	 
+	 */
+
+	public void dessiner(Graphics2D g2d,AffineTransform matTransfo) {
+		//sauvegarde des transformations courantes
+		AffineTransform mat = g2d.getTransform();
+		g2d.setColor(couleur);
+		g2d.rotate(orientation, origX, origY);
+
+		double finX = origX+norme;
+		
+		g2d.draw( matTransfo.createTransformedShape(new Line2D.Double(origX, origY, finX, origY)));  //ligne formant le vecteur
+
+		Line2D.Double traitDeTete = new Line2D.Double( finX-longPointe, origY, finX, origY);
+		g2d.rotate(rotPointe, finX,  origY);
+		g2d.draw(matTransfo.createTransformedShape(traitDeTete));  //un des deux traits qui forment la tete de fleche
+		g2d.rotate(-2*rotPointe, finX, origY);
+		g2d.draw(matTransfo.createTransformedShape(traitDeTete));
+
+		g2d.setTransform(mat);  //restauration des transformations precedentes
+	}
+
+	/**
+	 * Methode permettant de modifier la longueur de la pointe vecteur 
+	 * @param Graphics g2d	 
+	 */
+	public void setLongPointe(double longPointe){
+		this.longPointe = longPointe;
+	}
+	public double getOrigX() {
+		return origX;
+	}
+
+	public void setOrigX(double origX) {
+		this.origX = origX;
+	}
+
+	public double getOrigY() {
+		return origY;
+	}
+
+	public void setOrigY(double origY) {
+		this.origY = origY;
+	}
+
+	public double getOrientation() {
+		return orientation;
+	}
+
+	public void setOrientation(double orientation) {
+		this.orientation = orientation;
+	}
+	public double getNorme() {
+		return norme;
+	}
+
+	public void setNorme(double norme) {
+		this.norme = norme;
+	}
+	public Color getCouleur() {
+		return couleur;
+	}
+
+	public void setCouleur(Color couleur) {
+		this.couleur = couleur;
+	}
+	public void additionnerLesVecteurs(VecteurGraphique vecteur2){
+		origX = origX + vecteur2.getOrigX();
+		origY = origY + vecteur2.getOrigY();
+	}
+	public void projectionOrthogonale(VecteurGraphique vec){
+		
+	}
+
+
+}//fin classe

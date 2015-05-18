@@ -1,0 +1,128 @@
+package barre.droite;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.RenderingHints;
+import java.io.IOException;
+import javax.imageio.ImageIO;
+import javax.swing.JButton;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import javax.swing.JLabel;
+import java.awt.Color;
+/**
+ * Classe graphique utilisee pour creer les boutons et imager les boutons
+ * @author Edouard
+ * @version 04/03/14
+ */
+
+public class Bouton  extends  JButton  {
+	private static final long serialVersionUID = 1L;
+
+	private Image quitter,retour,play,reset,help,jouerPrinc,creer,instructions,quitterPrinc;
+	private String button;
+	/**
+	 * @wbp.nonvisual location=151,79
+	 */
+	private final JLabel typeBouton = new JLabel();
+	
+
+	/**
+	 * Constructeur du bouton
+	 */
+	public Bouton() {
+		typeBouton.setLabelFor(this);
+		
+		
+		addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseEntered(MouseEvent arg0) {				
+				typeBouton.setVisible(true);				
+			}
+			@Override
+			public void mouseExited(MouseEvent e) {
+				typeBouton.setVisible(false);				
+			}
+		});
+		setPreferredSize(new Dimension(15,15));
+	
+		try {
+			quitter= ImageIO.read(getClass().getClassLoader().getResource("quitter.png"));
+			retour = ImageIO.read(getClass().getClassLoader().getResource("Retour.png"));
+			play = ImageIO.read(getClass().getClassLoader().getResource("play.png"));
+			reset = ImageIO.read(getClass().getClassLoader().getResource("undo.png"));
+			help = ImageIO.read(getClass().getClassLoader().getResource("help.png"));
+			
+			jouerPrinc=ImageIO.read(getClass().getClassLoader().getResource("jouer.png"));
+			creer=ImageIO.read(getClass().getClassLoader().getResource("creer.png"));
+			instructions=ImageIO.read(getClass().getClassLoader().getResource("instruction.png"));
+			quitterPrinc=ImageIO.read(getClass().getClassLoader().getResource("quitterPrinc.png"));
+		} 
+		catch (IOException e) {
+			System.out.println("Erreur de lecture d'images");
+		}
+		button="quitter";
+		typeBouton.setBackground(Color.ORANGE)	;	
+		typeBouton.setVisible(false);
+		typeBouton.setBounds(10, 25,150,75);
+		add(typeBouton);
+
+	} //fin constructeur	
+	/**
+	 * Methode utilsee pour dessiner le bouton
+	 * @param Graphics g
+	 */
+	@Override
+	public void paintComponent(Graphics g) {
+		super.paintComponent(g);
+		Graphics2D g2d = (Graphics2D) g;
+		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
+		int sizeImage=50;
+		switch(button) {
+		case "quitter":			
+			g2d.drawImage(quitter, 0, 0, sizeImage,sizeImage, null);
+			typeBouton.setText("Terminer lappli");
+			break;
+		case "retour":			
+			g2d.drawImage(retour, 0, 0,sizeImage, sizeImage, null);
+			typeBouton.setText("Retour au menu");
+			break;	
+		case "play":			
+			g2d.drawImage(play, 0, 0, sizeImage, sizeImage, null);
+			typeBouton.setText("Jouer le niveau");
+			break;	
+		case "reinitialiser":			
+			g2d.drawImage(reset, 0, 0, sizeImage, sizeImage, null);
+			typeBouton.setText("Reinitialiser");
+			break;	
+		case "aide":
+			g2d.drawImage(help, 0,0, sizeImage,sizeImage, null);
+			typeBouton.setText("Aide");
+			break;
+		case "jouer":
+			g2d.drawImage(jouerPrinc, 0,0, 175,60, null);		
+			break;
+		case "instruction":
+			g2d.drawImage(instructions, 0,0,175,60, null);		
+			break;
+		case "creer":
+			g2d.drawImage(creer, 0,0,175,60, null);			
+			break;
+		case "quitterPrinc":
+			g2d.drawImage(quitterPrinc, 0,0, 175,60, null);			
+			break;
+					
+		}
+	}
+
+	/**
+	 * methode permettant de choisir le bouton voulu
+	 * @param String button
+	 * @category quitter,retour,play,reinitialiser,aide,jouer,instruction,creer,quitterPrinc
+	 */
+	public void setbutton(String button) {
+		this.button = button;
+	}
+
+} //fin classe

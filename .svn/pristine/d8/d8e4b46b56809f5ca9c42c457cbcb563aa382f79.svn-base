@@ -1,0 +1,954 @@
+package niveaux;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.RenderingHints;
+import java.awt.Shape;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
+
+import java.awt.geom.Rectangle2D;
+
+
+import java.util.ArrayList;
+
+import javax.imageio.ImageIO;
+import javax.swing.JPanel;
+
+
+import objets.graphiques.Canon;
+import objets.graphiques.Cible;
+import objets.graphiques.VecteurGraphique;
+import objets.graphiques.Projectile;
+import obstacles.ObstacleElectrique;
+import obstacles.ObstaclePhysique;
+import java.awt.event.MouseMotionAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseAdapter;
+import java.io.IOException;
+import javax.swing.JCheckBox;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
+
+import javax.swing.JLabel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerListModel;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.event.EventListenerList;
+import ecouteur.niveau.EcouteurDeNiveaux;
+import javax.swing.JButton;
+
+
+//Classe de graphique des niveaux : elle contiendra les niveaux jouables
+/**
+ *  Classe permettant d'instancier un niveau 
+ * @author Jude Fort et Edouard
+ * @version 14/02/14
+ */
+public class Niveaux extends JPanel implements Runnable {
+
+	private static final long serialVersionUID = 1L;
+	//Constantes
+	//	private final double LARGEUR_MONDE=1100;
+	private final double HAUTEUR_MONDE= 600;
+
+	//Objets dessinés
+	private Canon canon;
+	private Projectile projectile;
+	private Projectile balleHypo;
+	private Rectangle2D boundsHaut,boundsDroit,sol,barreGauche,boundsBas;
+	private ArrayList<ObstaclePhysique> obstaclesPhysiques;
+	private ArrayList<ObstacleElectrique> obstaclesElectriques;
+	private ArrayList<Shape> testShapePhy,testShapeElec;
+	private ArrayList<ObstaclePhysique> listeObstacle;
+	private ArrayList<ObstacleElectrique> listeObstacleElec;
+
+
+	private Cible cible;
+
+	//autres donnees
+	private double rotate = 25;
+	private double angle=0;
+	private double hauteur;
+	private double largeur;
+	private boolean enAnimation = false, premierClick = true, cibleAtteinte = false, pasDeCollision=true,pasDeCollisionElec=true; 
+	private Thread proc=null;
+	private long tempsDuSleep = 17;	// 80 f + 2 O 3O+5f
+	private double distTang;
+	private int posXSouris,posYSouris;
+	private boolean collisionElectrique,modeScientifique,vecteurVItesse,vecteurAcceleration, indice=false;
+	private int nombreDeTirs = 0 ;
+	// niveau
+	private Integer numero=1;
+	// projectile
+	private Integer chargeProjectile;
+	private double limiteVitesseX=75;
+	private double limiteVitesseY=100;	
+	private double vitesseX;
+	private double vitesseY;
+	private double deltaT=0.001;
+	private Image niveauReussi;
+	private double temps = 0;
+	private JCheckBox chckbxModeScienti,chckbxModeVitesse,chckbxModeAcceleration;
+	// vecteur
+	private VecteurGraphique vecteur;
+
+	private Ellipse2D pointer,viseur;
+
+	//panneau laterale gauche
+	private JLabel lblVitesseXI;
+	private JLabel lblVitesseYI;	
+	private JSpinner spinnerChargeProjectileI;	
+	private JSpinner spinnerDTI;
+	private JLabel lblChargeI;
+	private JLabel lblDTI;
+	// indicateur
+	private JLabel lblVitesseX;
+	private JLabel lblVitesseY;
+	private JSpinner spinnerChargeProjectile;	
+	private JSpinner spinnerDT;
+	private JLabel lblCharge,lblChargeCoulomb;
+	private JLabel lblDT;
+
+	//Ecouteurs
+	private final EventListenerList ecouteurs,ecouteurs1;
+	private JButton btnSuivant;
+	private JButton btnPrecedent;
+	private JButton buttonRecommencer;
+
+
+
+	/**
+	 * Constructeur d'un niveau 
+	 */
+	public Niveaux(){		
+		if(!enAnimation){
+			mouvementsDeSouris();
+			barreLateraleGauche();			
+		}
+		pointer=new Ellipse2D.Double(0,0,0,0);
+		viseur=new Ellipse2D.Double(0,0,0,0);
+		ecouteurs = new EventListenerList();
+		ecouteurs1 = new EventListenerList();
+		vecteur= new VecteurGraphique(250,250,3,1.3);
+		obstaclesPhysiques = new ArrayList<ObstaclePhysique>();
+		obstaclesElectriques = new ArrayList<ObstacleElectrique>();
+		testShapePhy= new ArrayList<Shape>();
+		testShapeElec= new ArrayList<Shape>();
+		listeObstacle= new ArrayList<ObstaclePhysique>();
+		listeObstacleElec=new ArrayList<ObstacleElectrique>();
+		collisionElectrique=false;
+		modeScientifique=false;		
+		vecteurVItesse=true;
+		chargeProjectile=1;
+		try {
+			niveauReussi = ImageIO.read(getClass().getClassLoader().getResource("niveauReussi.png"));
+		} catch (IOException e) {			
+			e.printStackTrace();
+		}		
+
+		setBackground(new Color(0,0,50));
+
+
+		setPreferredSize(new Dimension(960,560));
+		setLayout(null);
+
+		btnSuivant = new JButton("Suivant");
+		btnSuivant.setEnabled(false);
+		btnSuivant.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(numero!=5){
+					lanceEvenNiveauTerminer();
+				}
+			}
+		});
+		btnSuivant.setBounds(10, 200, 89, 23);
+		add(btnSuivant);
+
+		btnPrecedent = new JButton("Precedent");		
+		btnPrecedent.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if(numero!=1){
+					lanceEvenNiveauPrecedent();				
+				}
+			}
+		});
+		btnPrecedent.setBounds(10, 234, 89, 23);
+		add(btnPrecedent);
+
+		buttonRecommencer = new JButton("Rejouer");
+		buttonRecommencer.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				cibleAtteinte=false;
+				nombreDeTirs=0;				
+				enAnimation=false;
+				premierClick=true;	
+				collisionElectrique=false;	
+				modeScientifique=false;		
+				vecteurVItesse=true;
+				indice=false;
+				buttonRecommencer.setEnabled(false);
+				repaint();
+			}
+		});		
+		buttonRecommencer.setEnabled(false);
+		buttonRecommencer.setBounds(10, 268, 89, 23);
+		add(buttonRecommencer);
+
+
+	}
+	/**
+	 * Methode utilisee pour ajouter les elements de la barre laterale gauche	 
+	 */
+	private void barreLateraleGauche() {
+		chckbxModeScienti = new JCheckBox("Mode Scientifique");
+		chckbxModeScienti.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {	
+				if(chckbxModeScienti.isSelected()){
+					modeScientifique=true;						
+					chckbxModeVitesse.setEnabled(true);
+					chckbxModeAcceleration.setEnabled(true);
+					lblDT.setEnabled(true);
+					spinnerDT.setEnabled(true);
+					repaint();
+				} else {			
+					modeScientifique=false;	
+					chckbxModeScienti.setSelected(false);					
+					chckbxModeVitesse.setEnabled(false);
+					chckbxModeAcceleration.setEnabled(false);
+					lblDT.setEnabled(false);
+					spinnerDT.setEnabled(false);
+					repaint();				
+				}
+			}
+
+		});
+		chckbxModeScienti.setBounds(10, 110, 120, 23);
+		add(chckbxModeScienti);
+
+		chckbxModeVitesse = new JCheckBox("Affi. Vitesse");
+		chckbxModeVitesse.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {	
+				if(chckbxModeVitesse.isSelected()){
+					vecteurAcceleration=false;
+					vecteurVItesse=true;
+					chckbxModeAcceleration.setSelected(false);
+					System.out.println("mode Acceleration");
+					repaint();
+				} else {			
+					vecteurAcceleration=true;	
+					vecteurVItesse=false;
+					chckbxModeVitesse.setSelected(false);
+					chckbxModeAcceleration.setSelected(true);
+					System.out.println("! mode Acceleration");
+					repaint();				
+				}
+			}
+
+		});
+		chckbxModeVitesse.setBounds(15, 140, 97, 23);
+		chckbxModeVitesse.setSelected(true);
+		chckbxModeVitesse.setEnabled(false);
+		add(chckbxModeVitesse);
+
+		chckbxModeAcceleration = new JCheckBox("Affi. Acceleration");
+		chckbxModeAcceleration.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {	
+				if(chckbxModeAcceleration.isSelected()){
+					vecteurAcceleration=true;
+					vecteurVItesse=false;
+					chckbxModeVitesse.setSelected(false);
+					System.out.println("mode Acceleration");
+					repaint();
+				} else {			
+					vecteurAcceleration=false;	
+					vecteurVItesse=true;
+					chckbxModeVitesse.setSelected(true);
+					chckbxModeAcceleration.setSelected(false);
+					System.out.println("! mode Acceleration");
+					repaint();				
+				}
+			}
+
+		});
+		chckbxModeAcceleration.setBounds(15, 170, 97, 23);
+		chckbxModeAcceleration.setEnabled(false);
+		add(chckbxModeAcceleration);
+
+		lblVitesseXI = new JLabel("Vitesse en X");		
+		lblVitesseXI.setBounds(0, 25, 100, 15);
+		add(lblVitesseXI);
+
+		lblVitesseX = new JLabel(" "+0+ " (cm/s)");		
+		lblVitesseX.setBounds(0, 45, 100, 14);
+		add(lblVitesseX);
+
+		lblVitesseYI = new JLabel("Vitesse en Y");
+		lblVitesseYI.setBounds(0, 65, 100, 14);
+		add(lblVitesseYI);
+
+		lblVitesseY = new JLabel(" "+ 0 +" (cm/s)");
+		lblVitesseY.setBounds(0, 85, 100, 14);
+		add(lblVitesseY);
+
+
+
+
+
+		spinnerChargeProjectile = new JSpinner();
+		spinnerChargeProjectile.setModel(new SpinnerNumberModel(1, -5, 5, 1));
+		spinnerChargeProjectile.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				chargeProjectile=(Integer) spinnerChargeProjectile.getValue();				
+			}
+		});
+		spinnerChargeProjectile.setBounds(0, 460, 80, 35);
+		add(spinnerChargeProjectile);			
+
+		spinnerDT = new JSpinner();
+		spinnerDT.setModel(new SpinnerListModel(new String[] {"0.001","0.0001","0,00001"}));
+		spinnerDT.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				deltaT=  Double.parseDouble( (String) spinnerDT.getValue());				
+			}
+		});	
+		spinnerDT.setBounds(0, 515, 110, 35);
+		add(spinnerDT);
+
+		lblCharge = new JLabel("Ch. du Projectile");
+		lblCharge.setBounds(10, 430, 100, 14);
+		add(lblCharge);
+		lblChargeCoulomb=new JLabel("en Coulomb");
+		lblChargeCoulomb.setBounds(10, 448, 100, 14);
+		add(lblChargeCoulomb);
+
+		lblDT = new JLabel("Dt du calcul");
+		lblDT.setEnabled(false);
+		spinnerDT.setEnabled(false);
+		lblDT.setBounds(10, 505, 70, 14);
+		add(lblDT);
+	}
+	/**
+	 * Methode utilisée pour ajouter un obstacle physique de forme rectangulaire dans un niveau
+	 * @param longueur : la longueur du rectangle
+	 * @param hauteur : la hauteur du rectangle
+	 * @param posX : la position en X du rectangle
+	 * @param posY : la position en Y du rectangle
+	 * @param angle : l'angle d'inclinaison du rectangle
+	 */
+	public void ajouterUnObstaclePhysiqueCarre(double longueur, double hauteur, double posX, double posY, double orientation){
+		ObstaclePhysique obstaclePhysique = new ObstaclePhysique(longueur,hauteur,posX,posY,orientation);
+		obstaclesPhysiques.add(obstaclePhysique);
+	}
+	/**
+	 * Methode utilisee pour ajouter un obstacle physique de forme circulaire dans un niveau
+	 * @param rayon : le rayon qu'aura le cercle
+	 * @param posX : la position en X du cercle
+	 * @param posY : la position en Y du cercle
+	 */
+	public void ajouterUnObstaclePhysiqueRond(double rayon, double posX, double posY){
+		ObstaclePhysique obstaclePhysique = new ObstaclePhysique(rayon,posX,posY);
+		obstaclesPhysiques.add(obstaclePhysique);
+	}
+	/**
+	 * Methode utilisee pour ajouter un obstacle physique dans un niveau quand l'obstacle a deja ete creer
+	 * @param obsPhys : L'obstacle que l'on veut ajouter
+	 */
+	public void ajouterUnObstaclePhysique(ObstaclePhysique obsPhys){
+		obstaclesPhysiques.add(obsPhys);
+	}
+	/**
+	 * Methode utilisee pour ajouter un obstacle electrique dans un niveau
+	 * @param obsElectrique : l'obstacle electrique que l'on veut ajouter
+	 */
+	public void ajouterUnObstacleElectrique(ObstacleElectrique obsElectrique){
+		obstaclesElectriques.add(obsElectrique);
+	}
+	/**
+	 * Methode utilisee pour placer la cible dans le niveau
+	 * @param posX : position en X de la cible
+	 * @param posY : position en Y de la cible
+	 * @param largeur : largeur de la cible
+	 */
+	public void ajouterlaCible(double posX,double posY,double largeur){
+		cible = new Cible(posX, posY,largeur);
+	}
+
+	/**
+	 * Methode utilisee pour modifier la charge du projectile
+	 * @param cahrge : charge du projectile
+	 */
+	public void setChargeProjectile( Integer charge){
+		chargeProjectile=charge;
+	}
+	/**
+	 * Methode utilisee pour ajouter un canon
+	 * @param angle : angle du canon	
+	 * @param posX :position en X de la cible
+	 */
+	public void ajouterCanon(double angle, double positionX){
+		canon = new Canon(angle, positionX,440);
+	}
+	/**
+	 * Methode servant a dessiner le niveau
+	 * @param Graphics g 	 
+	 */
+	@Override
+	public void paintComponent(Graphics g){
+		super.paintComponent(g);
+		Graphics2D g2d = (Graphics2D) g;
+		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
+		//AffineTransform matTransfo = matriceMondeVersComposant(0,0,LARGEUR_MONDE,HAUTEUR_MONDE);
+		AffineTransform matTransfo = matriceMondeVersComposant(0,0,HAUTEUR_MONDE*getWidth()/(double)getHeight(),HAUTEUR_MONDE);	
+		g2d.setColor(Color.blue);
+
+		//limite
+		boundsHaut=new Rectangle2D.Double(0, -115, 1100, 100);	
+		boundsDroit=new Rectangle2D.Double(1115, 0, 200, 600);
+		boundsBas = new Rectangle2D.Double(150,440+105,getWidth(),150);	
+
+		g2d.fill(matTransfo.createTransformedShape(boundsDroit));
+		g2d.fill(matTransfo.createTransformedShape(boundsHaut));
+		g2d.fill(matTransfo.createTransformedShape(boundsBas));
+
+
+		barreGauche=new Rectangle2D.Double(0,0,150,getHeight());	
+		sol = new Rectangle2D.Double(150,440+90,getWidth(),150);	
+
+		if (cible != null){
+			cible.creer(matTransfo);
+			cible.dessiner(g2d, matTransfo);
+		}
+		// ensemble test
+		if (enAnimation && balleHypo!=null && projectile!=null){
+			balleHypo.creer(matTransfo);				
+			projectile.creer(matTransfo);
+
+			testCollision(g2d, matTransfo);
+			testCollisionElectrique(g2d,matTransfo);
+			testCollisionCible(g2d,matTransfo);
+			testBounds(g2d,matTransfo);
+			//balleHypo.deplacerLeProjectile(temps);
+			//balleHypo.dessiner(g2d,matTransfo);	
+			//projectile.deplacerLeProjectile(temps);	
+			balleHypo.deplacerLeProjectile(temps);	
+			projectile.deplacerLeProjectile(temps);				
+			projectile.dessiner(g2d,matTransfo);
+
+
+		}
+		// vecteur
+		if(projectile!=null && modeScientifique){
+
+			if(vecteurVItesse && enAnimation){			
+				vecteur.setOrigX(projectile.getPosX()+6);
+				vecteur.setOrigY(projectile.getPosY()+6);
+				vecteur.setNorme(projectile.getForceVecteur());
+				vecteur.setOrientation(projectile.getOrientationVecteur());	
+				if(projectile.getCharge() >0){
+					vecteur.setCouleur((new Color(255,0,0,255)));}				
+				if(projectile.getCharge() <0){
+					vecteur.setCouleur((new Color(0,128,128,255)));}				
+				if(projectile.getCharge()==0){
+					vecteur.setCouleur((new Color(255,215,0,255)));}				
+				vecteur.dessiner(g2d,matTransfo);
+			}
+			if(vecteurAcceleration && enAnimation){			
+				vecteur.setOrigX(projectile.getPosX()+5);
+				vecteur.setOrigY(projectile.getPosY()+5);
+				vecteur.setNorme(projectile.getForceAcceleration()*4);
+				if(projectile.getCharge() >0){
+					vecteur.setCouleur((new Color(255,0,0,255)));}				
+				if(projectile.getCharge() <0){
+					vecteur.setCouleur((new Color(0,128,128,255)));}				
+				if(projectile.getCharge()==0){
+					vecteur.setCouleur((new Color(255,215,0,255)));}	
+				//System.out.println(" force :"+projectile.getForceAcceleration());
+				vecteur.setOrientation(projectile.getOrientationAcceleration());
+				//	System.out.println(" orient :"+projectile.getOrientationAcceleration());
+				vecteur.dessiner(g2d,matTransfo);
+			}
+
+		}
+		//obsPhysique
+		if (!obstaclesPhysiques.isEmpty()){			
+			for (int i = 0; i < obstaclesPhysiques.size(); i++) {
+				obstaclesPhysiques.get(i).dessiner(g2d, matTransfo);
+				obstaclesPhysiques.get(i).creer( matTransfo);
+				testShapePhy.add(obstaclesPhysiques.get(i).getShape());	
+				listeObstacle.add(obstaclesPhysiques.get(i));
+			}
+		}
+		//obsElectriques
+		if (!obstaclesElectriques.isEmpty()){			
+			for (int i = 0; i < obstaclesElectriques.size(); i++) {
+				if(collisionElectrique){
+					obstaclesElectriques.get(i).setAireVisible(true);
+				} else {
+					obstaclesElectriques.get(i).setAireVisible(false);
+				}
+				obstaclesElectriques.get(i).creer( matTransfo);
+				obstaclesElectriques.get(i).dessiner(g2d, matTransfo);	
+				testShapeElec.add(obstaclesElectriques.get(i).getShape());	
+				listeObstacleElec.add(obstaclesElectriques.get(i));
+			}
+		}
+		g2d.setColor(Color.white);
+		g2d.fill(matTransfo.createTransformedShape(barreGauche));
+		g2d.setColor(Color.black);	
+		g2d.fill(matTransfo.createTransformedShape(sol));
+		g2d.setColor(Color.gray);
+		g2d.fill(matTransfo.createTransformedShape(pointer));
+
+		if(projectile!=null){
+			lblVitesseX.setText(" "+ Math.round(projectile.getVitesseX()) +" (cm/s)");
+			lblVitesseY.setText(" "+ Math.round(projectile.getVitesseY()) +" (cm/s)");
+		}
+
+		g2d.setColor(Color.black);	
+		g2d.drawString(" Vitesse Initiale"+  "  en cm/s", 0, 320);
+		g2d.drawString(" X:  "+ Math.round(vitesseX)+ " (cm/s)", 0, 345);
+		g2d.drawString(" Y: "+ Math.round(vitesseY)+ " (cm/s)", 0, 365);
+		g2d.drawString(" # De tir : "+ nombreDeTirs, 0, 385);
+
+
+		if(nombreDeTirs>3){
+			indice=true;
+		}
+		if(indice){
+			switch(numero) {
+			case 1:			
+				g2d.drawString(" Indice : 43X,-87Y ", 0, 575);
+				break;
+			case 2:			
+				g2d.drawString(" Indice : 78X,-74Y ", 0,575);
+				break;	
+			case 3:			
+				g2d.drawString(" Indice : 57X,74Y ", 0, 575);
+				g2d.drawString("+ charge nul ", 5, 590);
+				break;
+			case 4:			
+				g2d.drawString(" Indice : 37X,-83Y ", 0, 575);
+				g2d.drawString("+ charge nul ", 5, 590);
+				break;
+			case 5:			
+				g2d.drawString(" Indice : 78x,-78Y ", 0, 575);
+				g2d.drawString("+ charge nul ", 5, 590);
+				break;
+
+			}			
+		}
+
+		if(cibleAtteinte){
+			g2d.drawImage(niveauReussi, ((getWidth()/2)-200), ((getHeight()/2)-50), null);
+		}
+
+		canon.setAngle(-rotate);
+		canon.dessiner(g2d,matTransfo); 		
+	}
+
+	/**
+	 * methode pour faire le projectile se deplacer
+	 */
+	@Override
+	public void run() {
+		while(enAnimation){	
+			temps=temps + deltaT;			
+			repaint();
+			try {
+				Thread.sleep(tempsDuSleep);			
+			}catch(InterruptedException e){
+				e.printStackTrace();
+			}
+		}	
+	}
+	/**
+	 * Methode qui permet de savoir combien de tirs l'utilisateur a fait dans un niveau
+	 * @return : le nombre de tirs
+	 */
+	public int getNombreDeTirs() {
+		return nombreDeTirs;
+	}
+	/**
+	 * Methode qui permet de modifier le nombre de tirs fait par un utilisateur
+	 * @param nombreDeTirs : nombre de tirs voulu
+	 */
+	public void setNombreDeTirs(int nombreDeTirs) {
+		this.nombreDeTirs = nombreDeTirs;
+	}
+	/**
+	 * Methode qui permet au panel de savoir si la cible a ete atteinte
+	 * @return : cibleAtteinte
+	 */
+	public boolean getCibleAtteinte(){
+		return cibleAtteinte;
+	}
+	/**
+	 * Methode qui permet au panel de modifier si la lcible est atteinte	
+	 */
+	public void setCibleAtteinte(boolean cible){
+		cibleAtteinte=cible;
+	}
+	/**
+	 * Methode qui permet au panel de savoir si l'animation est teminee
+	 * @return : enAnimation
+	 */
+	public boolean getEnAnimation(){
+		return enAnimation;
+	}
+	/**
+	 * Methode qui permet au panel de mettre fin a l'animation
+	 * @return : enAnimation
+	 */
+	public void setEnAnimation( boolean enAnimation){
+		this.enAnimation=enAnimation;
+	}
+	/**
+	 * @return the btnPrecedent
+	 */
+	public JButton getBtnPrecedent() {
+		return btnPrecedent;
+	}
+	/**
+	 * @param btnPrecedent the btnPrecedent to set
+	 */
+	public void setBtnPrecedent(JButton btnPrecedent) {
+		this.btnPrecedent = btnPrecedent;
+	}
+	/**
+	 * @return the btnSuivant
+	 */
+	public JButton getBtnSuivant() {
+		return btnSuivant;
+	}
+	/**
+	 * @param btnSuivant the btnSuivant to set
+	 */
+	public void setBtnSuivant(JButton btnSuivant) {
+		this.btnSuivant = btnSuivant;
+	}
+	/**
+	 * @return the buttonRecommencer
+	 */
+	public JButton getButtonRecommencer() {
+		return buttonRecommencer;
+	}
+	/**
+	 * @param buttonRecommencer the buttonRecommencer to set
+	 */
+	public void setButtonRecommencer(JButton buttonRecommencer) {
+		this.buttonRecommencer = buttonRecommencer;
+	}
+	/**
+	 * Methode qui permet au panel de savoir si c<est le premier click
+	 * @return : premierClick
+	 */
+	public boolean getPC(){
+		return premierClick;
+	}
+	/**
+	 * Methode qui permet au panel de smodifier le premier click
+	 * @return : premierClick
+	 */
+	public void setPremierClick(boolean b) {
+		premierClick=b;		
+	}
+	/**
+	 * methode pour mettre fin au  thread et lancer un autre projectile
+	 */
+	private void finThread() {
+		enAnimation=false;
+		premierClick=true;	
+		collisionElectrique=false;		
+		lblVitesseX.setText(" "+ Math.round(projectile.getVitesseX()) +" (cm/s)");
+		lblVitesseY.setText(" "+ Math.round(projectile.getVitesseY()) +" (cm/s)");	
+		nombreDeTirs=nombreDeTirs +1 ;		
+		if(nombreDeTirs>8 || cibleAtteinte){
+			if(numero!=6 && numero!=5){
+				btnSuivant.setEnabled(true);
+			}
+			buttonRecommencer.setEnabled(true);
+			if(numero!=1 && numero!=6){
+				btnPrecedent.setEnabled(true);		
+			}			
+		}
+		repaint();
+	}
+
+	/**
+	 * methode permettant de retablir le niveau
+	 */
+	public void retablir() {			
+		enAnimation=false;
+		premierClick=true;	
+		cibleAtteinte = false ;
+		collisionElectrique=false;	
+		modeScientifique=false;		
+		vecteurVItesse=true;
+		lblVitesseX.setText(" "+ Math.round(projectile.getVitesseX()) +" (cm/s)");
+		lblVitesseY.setText(" "+ Math.round(projectile.getVitesseY()) +" (cm/s)");	
+		obstaclesPhysiques.clear();
+		obstaclesElectriques.clear();
+		testShapePhy.clear();
+		testShapeElec.clear();
+		listeObstacle.clear();
+		repaint();
+	}
+	/**
+	 * methode partant l'animation
+	 */
+	public void play() {			
+		proc = new Thread(Niveaux.this);
+		proc.start();
+		temps=0;		
+		premierClick = false;		
+	}
+	/**
+	 * Methode qui permetera a l'application de savoir si elle doit passer au niveau suivant
+	 */
+	public void addNiveauTerminer(EcouteurDeNiveaux ecoute){
+		ecouteurs.add(EcouteurDeNiveaux.class, ecoute);
+	}
+	/**
+	 * Methode privee utilisee pour lancer l'evennement d'un niveau terminer
+	 */
+	private void lanceEvenNiveauTerminer(){
+		for(EcouteurDeNiveaux ecoute: ecouteurs.getListeners(EcouteurDeNiveaux.class)){
+			ecoute.niveauTerminer();
+		}
+	}
+	/**
+	 * Methode qui permetera a l'application de savoir si elle doit passer au niveau precedent
+	 */
+	public void addNiveauPrecedent(EcouteurDeNiveaux ecoute){
+		ecouteurs.add(EcouteurDeNiveaux.class, ecoute);
+	}
+	/**
+	 * Methode privee utilisee pour lancer l'evennement d'un niveau terminer
+	 */
+	private void lanceEvenNiveauPrecedent(){
+		for(EcouteurDeNiveaux ecoute: ecouteurs.getListeners(EcouteurDeNiveaux.class)){
+			ecoute.niveauPrecedent();
+		}
+	}
+	/**
+	 * Methode privee pour ajouter les mouvements de la souris a l'application
+	 */
+	private void mouvementsDeSouris(){
+		addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				enAnimation = true;
+				if(premierClick && arg0.getX()>150){		
+					projectile = new Projectile(chargeProjectile,vitesseX,vitesseY,canon.getPosX()+50,canon.getPosY()+35);
+					balleHypo= new Projectile(chargeProjectile,vitesseX,vitesseY,canon.getPosX()+50,canon.getPosY()+35);
+					pointer=new Ellipse2D.Double(arg0.getX()-4,arg0.getY()-4,8,8);						
+					premierClick=false;					
+					System.out.println("projectile cree");					
+					if(enAnimation){							
+						play();
+					}
+				}
+				if(arg0.getClickCount()==2){					
+					finThread();
+					System.out.println("fin thread");
+				}
+			}
+		});		
+		addMouseMotionListener(new MouseMotionAdapter() {
+			@Override
+			public void mouseMoved(MouseEvent arg0) {
+				if(!enAnimation) {
+					angleDeTir(arg0);
+					repaint();
+				}				
+			}
+		});
+	}
+	/**
+	 * Methode privee faire les test de collision
+	 * @param Graphics2D g2d 
+	 * @param AffineTransform matTransfo
+	 */
+	private void testCollision(Graphics2D g2d, AffineTransform matTransfo) {
+		if (!testShapePhy.isEmpty()){	
+			for (int i = 0; i < testShapePhy.size(); i++) {
+				if(testShapePhy.get(i).getBounds2D().intersects((Rectangle2D) balleHypo.getShape().getBounds2D())){ 					
+					Area balle=new Area(balleHypo.getShape());
+					Area obs=new Area(testShapePhy.get(i));
+					Area coliPhy= new Area(balle);
+					coliPhy.intersect(obs);
+
+					if(!coliPhy.isEmpty()){	
+						if(!balleHypo.isEnCollision()){
+							balleHypo.collisonPhysique(5000,listeObstacle.get(i));	
+							projectile.setVitesse(balleHypo.getVitesseX(), balleHypo.getVitesseY());
+							//projectile.collisonPhysique(100000,listeOrientation.get(i),listePosXObsPhy.get(i),listePosYObsPhy.get(i));	
+							balleHypo.setEnCollision(true);
+							projectile.setEnCollision(true);
+							pasDeCollision=false;
+						} else {
+							pasDeCollision=true;
+						}				
+					}	
+				} //fin iintersect	
+			}
+			if(pasDeCollision){
+				balleHypo.setEnCollision(false);
+				projectile.setEnCollision(false);
+			}
+		}//fin null
+	} // fin methode
+
+	/**
+	 * Methode determinant si le projectile a atteint les limites
+	 * @param Graphics2D g2d 
+	 * @param AffineTransform matTransfo
+	 */
+	private void testBounds(Graphics2D g2d, AffineTransform matTransfo) {
+
+		if(sol.getBounds2D().intersects((Rectangle2D) projectile.getShape().getBounds2D())){											
+			finThread();
+			//	projectile.dessiner(g2d,matTransfo);
+			System.out.println("Fin thread, bounds bas");
+		} 	
+		if(boundsHaut.getBounds2D().intersects((Rectangle2D) projectile.getShape().getBounds2D())){								
+			finThread();
+			//	projectile.dessiner(g2d,matTransfo);
+			System.out.println("Fin thread, bounds haut");
+		} 	
+		if(boundsDroit.getBounds2D().intersects((Rectangle2D) projectile.getShape().getBounds2D())){										
+			finThread();
+			//	projectile.dessiner(g2d,matTransfo);
+			System.out.println("Fin thread, bounds droit");
+		} 
+		if(barreGauche.getBounds2D().intersects((Rectangle2D) projectile.getShape().getBounds2D())){									
+			finThread();
+			//projectile.dessiner(g2d,matTransfo);
+			System.out.println("Fin thread, bounds gauche");
+		} 
+		//fin 
+	}
+	/**
+	 * Methode determinant si il y a eu collision electrique
+	 * @param Graphics2D g2d 
+	 * @param AffineTransform matTransfo
+	 */
+	private void testCollisionElectrique(Graphics2D g2d, AffineTransform matTransfo){	
+		if(projectile.getCharge()!=0){
+			if (!testShapeElec.isEmpty()){				
+				for (int i = 0; i < testShapeElec.size(); i++) { // pour chaque shape
+					//if(testShapeElec.get(i).getBounds2D().intersects((Rectangle2D) balleHypo.getShape().getBounds2D())){ // test preliminaire
+					Area aireProjectile = new Area(balleHypo.getShape());		
+					Area aireObstacleElectrique = new Area(testShapeElec.get(i));
+					Area coliElec= new Area(aireProjectile);
+					coliElec.intersect(aireObstacleElectrique);
+					collisionElectrique=true;
+					if(!coliElec.isEmpty()){	
+						if(!balleHypo.isEnCollisionElec()){													
+							balleHypo.collisionElectrique(listeObstacleElec.get(i));
+							projectile.collisionElectrique(listeObstacleElec.get(i));	
+							balleHypo.setEnCollisionElec(true);
+							projectile.setEnCollisionElec(true);
+							pasDeCollisionElec=false;						
+						}
+					} else {	
+						pasDeCollisionElec=true;						
+					}	
+					//}
+				}
+				if(pasDeCollisionElec){			
+					balleHypo.setEnCollisionElec(false);
+					projectile.setEnCollisionElec(false);
+					collisionElectrique=false;
+				}
+			}
+		}// fin test preliminaire
+	}
+	/**
+	 * Methode determinant sile projectile atteint la cible
+	 * @param Graphics2D g2d 
+	 * @param AffineTransform matTransfo
+	 */
+	private void testCollisionCible(Graphics2D g2d, AffineTransform matTransfo){		
+		if(cible.getShape().getBounds2D().intersects((Rectangle2D) projectile.getShape().getBounds2D())){										
+			cibleAtteinte = true;		
+			finThread();				
+			System.out.println("Fin thread,cible");			
+		} 
+	}
+	/**
+	 * Methode privee pour ajouter les mouvements de la souris a l'application
+	 * @param MouseEvent arg0
+	 */
+	private void angleDeTir(MouseEvent arg0){
+		hauteur=canon.getPosY()-arg0.getY();				
+		largeur=arg0.getX()-canon.getPosX();	
+		posYSouris=arg0.getY();
+		posXSouris=arg0.getX();
+
+		// methode 1
+		/*
+		angle=hauteur/largeur;		
+		distTang= Math.sqrt(Math.pow(hauteur, 2)+  Math.pow(largeur, 2));	
+		//if(distTang>220 && arg0.getX()>150){
+		rotate= Math.atan(angle);
+		//}
+		if(hauteur<0){vitesseY=-2;} 
+		if(hauteur<350 && hauteur> 0 ){	vitesseY=-(limiteVitesseY*(hauteur/350));}// vitesse Y
+		if(hauteur>350){vitesseY = -limiteVitesseY;}
+
+
+		if(largeur<50){vitesseX=10;}		
+		if(largeur<415 && largeur> 100){vitesseX= (limiteVitesseX)*largeur/315;	}
+		if(largeur>415){vitesseX = limiteVitesseX;}
+		 */
+		//m2
+		distTang= Math.sqrt(Math.pow(hauteur, 2)+  Math.pow(largeur, 2));		
+		//if(distTang>220){
+		rotate= Math.atan2(hauteur,largeur);
+		//}
+		//if(hauteur<0){vitesseY=-2;} 
+		if(hauteur<350 && hauteur> 0 ){	vitesseY=-(Math.sin(rotate)*(distTang/4));}// vitesse Y
+		//if(hauteur>415 && hauteur<415){vitesseY = -limiteVitesseY;}
+
+
+		//if(largeur<50 && largeur>-50){vitesseX=10;}		
+		if(posXSouris<canon.getPosX()){vitesseX=(Math.cos(rotate)*(distTang/7));	}
+		if(posXSouris>canon.getPosX()&& largeur<550){vitesseX=(Math.cos(rotate)*(distTang/7));	}		
+	}	
+	/**
+	 * matrice qui transforme les mesures en pixels en centimetres
+	 * @param coinMondeX
+	 * @param coinMondeY
+	 * @param largeurMonde
+	 * @param hauteurMonde
+	 * @return
+	 */
+	private AffineTransform  matriceMondeVersComposant(double coinMondeX, double coinMondeY, double largeurMonde, double hauteurMonde) {
+		AffineTransform matTransfo =  new AffineTransform(); 
+		double pixelsParUniteX =  getWidth()/largeurMonde;
+		double pixelsParUniteY = getHeight()/hauteurMonde;
+		matTransfo.scale( pixelsParUniteX, pixelsParUniteY );
+		matTransfo.translate( -coinMondeX, -coinMondeY );
+		return (matTransfo);
+	}
+	/**
+	 * @return the numero
+	 */
+	public Integer getNumero() {
+		return numero;
+	}
+	/**
+	 * @param numero the numero to set
+	 */
+	public void setNumero(Integer numero) {
+		this.numero = numero;
+	}
+}

@@ -1,0 +1,165 @@
+package objets.graphiques;
+
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Shape;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import javax.imageio.ImageIO;
+
+
+/**
+ * Classe de geometrie du canon qui permet de choisir l'angle de tir et la position
+ * @author Jude Fort
+ * @version 14/02/14
+ */
+public class Canon  {	
+	private double angleDuCanon;
+	private double posX, posY; // en centimetres
+
+
+	private final double LARGEUR; // en centimetres
+	private Image imageCanon1,imageCanon2,imageCanon1I;
+	private Rectangle2D.Double rectImg, rectImg2;
+	private Shape rectCanon1Transf;
+	private Shape rectCanon2Transf;
+	/**
+	 * Initialise le canon a une position et un angle entre en parametre mais a une grandeur fixe
+	 * @param angleDuCanon : l'angle de tir du canon
+	 * @param posX : position du canon en X (sur la longueur)
+	 */
+	public Canon(double angleDuCanon, double posX, double hauteur){
+		this.angleDuCanon = -0.65;
+		this.posX = posX;
+		posY = hauteur;
+		LARGEUR = 100; // valeur temporaire;
+		lireLesImages();
+	}
+	/**
+	 * Methode servant a creer le canon
+	 * @param matransfo
+	 */
+	public void creer(AffineTransform matTransfo){			
+		rectImg = new Rectangle2D.Double(posX, posY, LARGEUR, LARGEUR);
+		rectCanon1Transf = matTransfo.createTransformedShape(rectImg);
+		rectImg2 = new Rectangle2D.Double(posX-LARGEUR/10,posY-LARGEUR/100, LARGEUR, LARGEUR);
+		rectCanon2Transf = matTransfo.createTransformedShape(rectImg2);
+	}
+	/**
+	 * Dessine le canon 
+	 * @param g2d
+	 * @param matTransfo : matrice qui transforme les mesures en pixels en metres
+	 */
+	public void dessiner(Graphics2D g2d, AffineTransform matTransfo){
+		AffineTransform mat = g2d.getTransform();
+
+		rectImg = new Rectangle2D.Double(posX, posY, LARGEUR, LARGEUR);
+		rectCanon1Transf = matTransfo.createTransformedShape(rectImg);
+		rectImg2 = new Rectangle2D.Double(posX-LARGEUR/10,posY-LARGEUR/100, LARGEUR, LARGEUR);
+		rectCanon2Transf = matTransfo.createTransformedShape(rectImg2);
+		// indicateur puissance
+				/*
+				ligne3D.moveTo(35,450);
+				ligne3D.lineTo(35 + largeur,450 -hauteur);
+				g2d.draw(ligne3D);
+				 */
+		lireLesImages();
+		if(angleDuCanon<1.57 && angleDuCanon>-1.57){
+		g2d.drawImage(imageCanon1, (int) rectCanon1Transf.getBounds2D().getX() ,(int) rectCanon1Transf.getBounds2D().getY(), (int) rectCanon1Transf.getBounds2D().getWidth(), (int) rectCanon1Transf.getBounds2D().getHeight(),null);
+		} else{
+			g2d.drawImage(imageCanon1I, (int) rectCanon1Transf.getBounds2D().getX() ,(int) rectCanon1Transf.getBounds2D().getY(), (int) rectCanon1Transf.getBounds2D().getWidth(), (int) rectCanon1Transf.getBounds2D().getHeight(),null);
+		}
+		g2d.rotate(angleDuCanon,(posX+LARGEUR/2)+1,(posY+LARGEUR/2)-5);
+		g2d.drawImage(imageCanon2, (int) rectCanon2Transf.getBounds2D().getX(), (int) rectCanon2Transf.getBounds2D().getY(), (int) rectCanon2Transf.getBounds2D().getWidth(), (int) rectCanon2Transf.getBounds2D().getHeight(),null);
+		g2d.rotate(-angleDuCanon,(posX+LARGEUR)+1,(posY+LARGEUR/2)-5);
+		
+		g2d.setTransform(mat);  
+	}
+	/**
+	 * Retourne la poistion x du personnage en pixels	 
+	 */
+	public Double getBoundsX(){
+		return rectCanon2Transf.getBounds2D().getX();		
+	}
+	/**
+	 * Retourne la poistion y du personnage en pixels	 
+	 */
+	public Double getBoundsY(){
+		return rectCanon2Transf.getBounds2D().getY();	
+	}
+	public Double getLargeur(){
+		return LARGEUR;
+	}
+	/**
+	 * Modifie l'angle de tir du canon, prends en parametre un angle en radian
+	 * @param angle : angle de tir en radian
+	 */
+	public void setAngle(double angle){		
+			angleDuCanon = angle;		
+	}
+
+	/**
+	 *Modifie la positon du canon, prends en parametre une position en X 
+	 * @param posX : position en X du canon
+	 */
+	public void setPosX(double posX){
+		this.posX = posX;		
+	}
+	/**
+	 * Methode retornant une valeure boolean pour indiquer que le canon a tiré
+	 * @return
+	 */
+	public boolean tirer(){
+		return true;
+	}
+	/**
+	 * Methode publique pour savoir si un clic a ete fait sur le canon
+	 * @param posX : La position en X du clic
+	 * @param posY : La position en Y du clic
+	 * @return
+	 */
+	public boolean surLeCanon(double posX, double posY){
+		
+		if (rectCanon1Transf.contains(posX,posY)||rectCanon2Transf.contains(posX, posY)){
+			return true;
+		}else{
+			return false;
+		}
+	}
+	/**
+	 * Methode privee retournant la position Y
+	 */
+	public double getPosY() {
+		return posY;
+	}
+	/**
+	 * Methode privee pour modifier la position Y
+	 */
+	public void setPosY(double posY) {
+		this.posY = posY;
+	}
+	/**
+	 * Methode retournant la positiohn X
+	 */
+	public double getPosX() {
+		return posX;
+	}
+	public Shape getShape(){
+		return rectImg;
+	}
+	/**
+	 * Methode privee pour lire les images attachees au projet
+	 */
+	private void lireLesImages(){
+		try {
+			imageCanon1= ImageIO.read(getClass().getClassLoader().getResource("Canon1.gif"));
+			imageCanon1I= ImageIO.read(getClass().getClassLoader().getResource("canonnG.gif"));
+			imageCanon2 = ImageIO.read(getClass().getClassLoader().getResource("main2.gif"));
+
+		} 
+		catch (IOException e) {
+			System.out.println("Erreur de lecture d'images");
+		}
+	}
+}

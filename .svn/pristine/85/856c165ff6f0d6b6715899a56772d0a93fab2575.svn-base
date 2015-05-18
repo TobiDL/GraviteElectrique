@@ -1,0 +1,126 @@
+package instructions;
+
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import java.awt.Color;
+
+import java.awt.Dimension;
+import javax.swing.JTextArea;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.SystemColor;
+/**
+ * Classe graphique utilisée pour afficher un menu d'instruction a l'utilisateur
+ * @author Edouard
+ * @version 04/03/14
+ */
+public class Instructions extends JPanel  {
+
+	private static final long serialVersionUID = 1L;
+	private JTabbedPane Pane;
+	private JPanel Utilisation;
+	private JPanel Concept;
+	private JPanel Sources;
+	private JPanel Apropos;
+	private JLabel lblNewLabel;
+	private Utilisation utilisation;
+	private JTextArea txtrGravitlectriqueEst_1;
+	private final JTextArea txtrPourChoisirLangle = new JTextArea();
+	private JTextArea txtrLeButDe;
+	private JTextArea txtrAfinDajouterUne;
+	private JTextArea txtrLesObstacleslectriques;
+	private JTextArea txtrEtUnObstacle;
+	private JTextArea txtrAprsEssais;
+
+	public Instructions(){
+		setLayout(null);		
+		setBackground(Color.lightGray);
+		utilisation = new Utilisation();
+		utilisation.setBounds(0, 0, 1250, 650);
+		utilisation.setBackground(Color.gray);
+		Pane = new JTabbedPane(JTabbedPane.TOP);
+		Pane.setToolTipText("Utilisation");
+		Pane.setBounds(0, 50, 1250, 1250);
+		add(Pane);
+		
+		Utilisation = new JPanel();
+		Utilisation.setPreferredSize(new Dimension(1250,1250));
+		Pane.addTab("Utilisation", null, Utilisation, null);
+		Utilisation.setLayout(null);
+		//Utilisation.add(utilisation);
+		txtrGravitlectriqueEst_1 = new JTextArea();
+		txtrGravitlectriqueEst_1.setEditable(false);
+		txtrGravitlectriqueEst_1.setForeground(Color.WHITE);
+		txtrGravitlectriqueEst_1.setFont(new Font("Franklin Gothic Medium", Font.PLAIN, 21));
+		txtrGravitlectriqueEst_1.setBackground(SystemColor.controlDkShadow);
+		txtrGravitlectriqueEst_1.setText(" Gravit\u00E9 \u00E9lectrique est un jeu interactif qui permet \u00E0 l\u2019utilisateur d\u2019en apprendre plus sur la\r\n physique m\u00E9canique et \u00E9lectrique.  Les instructions qui concernent l\u2019utilisation de notre\r\n application est s\u00E9par\u00E9e en deux parties la premi\u00E8re concerne la fa\u00E7on dont l\u2019utilisateur joue \r\n et la seconde comment  l\u2019utilisateur doit utiliser l\u2019\u00E9diteur de niveaux\r\n\r\n Mode Jouer : Pour jouer l\u2019utilisateur dispose d\u2019un canon non d\u00E9pla\u00E7able mais dont le \r\n canon est amovible donc l\u2019utilisateur peut choisir l\u2019angle avec lequel il voudra tirer vers la\r\n cible voici une repr\u00E9sentation photo du canon : ");
+		txtrGravitlectriqueEst_1.setBounds(0, 0, 1233, 300);
+		Utilisation.add(txtrGravitlectriqueEst_1);
+		
+		txtrPourChoisirLangle.setBounds(0, 400, 1233, 369);
+		Utilisation.add(txtrPourChoisirLangle);
+		
+		txtrPourChoisirLangle.setBackground(SystemColor.controlDkShadow);
+		txtrPourChoisirLangle.setForeground(Color.WHITE);
+		txtrPourChoisirLangle.setFont(new Font("Franklin Gothic Medium", Font.PLAIN, 21));
+		txtrPourChoisirLangle.setText("Pour choisir l\u2019angle de tir l\u2019utilisateur n\u2019a qu\u2019\u00E0 d\u00E9placer sa souris dans la fen\u00EAtre de \r\nl\u2019application l\u2019angle du canon sera d\u00E9terminer avec l\u2019angle de la souris. Pour d\u00E9cider de la \r\nvitesse initiale que l\u2019utilisateur donnera \u00E0 son projectile le joueur n\u2019a qu\u2019\u00E0 : approcher le \r\ncurseur du canon pour r\u00E9duire la vitesse ou \u00E9loigner le curseur du canon pour l\u2019augmenter. \r\n\r\nLe canon tire des projectiles qui poss\u00E8dent une charge qui est changeable par l\u2019utilisateur a l\u2019aide du \r\ntourniquet plac\u00E9 \u00E0 gauche du niveau comme le montre cette capture d\u2019\u00E9cran : \r\n\r\n\r\n");
+		
+				
+		Concept = new JPanel();
+		Pane.addTab("Concept", null, Concept, null);
+		Concept.setLayout(null);
+
+		
+		lblNewLabel = new JLabel("Concept");
+		lblNewLabel.setBounds(144, 152, 46, 14);
+		Concept.add(lblNewLabel);
+		
+		Apropos = new JPanel();
+		Pane.addTab("Apropos", null, Apropos, null);
+		Apropos.setLayout(null);
+
+		lblNewLabel = new JLabel("Apropos");
+		lblNewLabel.setBounds(144, 152, 46, 14);
+		Apropos.add(lblNewLabel);
+		
+		Sources = new JPanel();
+		Pane.addTab("Sources", null, Sources, null);
+		Sources.setLayout(null);
+		
+		lblNewLabel = new JLabel("Sources");
+		lblNewLabel.setBounds(144, 152, 46, 14);
+		Sources.add(lblNewLabel);
+		
+		txtrLeButDe = new JTextArea();
+		txtrLeButDe.setText("Le but de chaque niveaux est d\u2019atteindre la avec le projectile en utilisant le canon pour le propulser. La \r\ncible est de forme rectangulaire et est repr\u00E9sent\u00E9e sur la capture d\u2019\u00E9cran suivante :");
+		txtrLeButDe.setBounds(0, 650, 1233, 369);
+		Utilisation.add(txtrLeButDe);
+		
+		txtrAfinDajouterUne = new JTextArea();
+		txtrAfinDajouterUne.setText("Afin d\u2019ajouter une difficult\u00E9 aux niveaux nous avons ajout\u00E9s des obstacles de nature physiques et des \r\nobstacles de nature \u00E9lectrique.\r\n\r\nLes obstacles physiques sont pr\u00E9sents sous deux formes diff\u00E9rentes. Soit de forme circulaire ou \r\nrectangulaire comme sur la capture d\u2019\u00E9cran :\r\n");
+		txtrAfinDajouterUne.setBounds(0, 800, 1233, 369);
+		Utilisation.add(txtrAfinDajouterUne);
+		
+		txtrLesObstacleslectriques = new JTextArea();
+		txtrLesObstacleslectriques.setText("Les obstacles \u00E9lectriques ne sont  pr\u00E9sents que sur une seule forme mais l\u2019intensit\u00E9 varie. Plus la charge de\r\n l\u2019obstacle est grande plus elle influencera le d\u00E9placement du projectile lors de leurs interactions. Si la \r\ncharge de l\u2019obstacle \u00E9lectrique et celle du projectile ont le m\u00EAme signe (positive ou n\u00E9gative) elle se \r\nrepousserons mais si elle sont de signes contraires elles s\u2019attirerons. Un obstacle \u00E9lectrique ayant une \r\ncharge n\u00E9gative (charge < 0) est repr\u00E9sent\u00E9 par\r\n");
+		txtrLesObstacleslectriques.setBounds(0, 400, 1233, 369);
+		Utilisation.add(txtrLesObstacleslectriques);
+		
+		txtrEtUnObstacle = new JTextArea();
+		txtrEtUnObstacle.setText("Et un obstacle \u00E9lectrique ayant une charge positive (charge > 0 ) est repr\u00E9sent\u00E9 par ");
+		txtrEtUnObstacle.setBounds(0, 400, 1233, 369);
+		Utilisation.add(txtrEtUnObstacle);
+		
+		txtrAprsEssais = new JTextArea();
+		txtrAprsEssais.setText("Apr\u00E8s 3 essais d\u2019un niveau sans r\u00E9ussite le joueur a le droit \u00E0 un indice, apr\u00E8s 7 essais il passe automatiquement au niveau suivant.\r\nPendant le jeu l\u2019utilisateur peut en tout temps changer la vitesse de l\u2019animation donc il peut voir le \r\nd\u00E9placement du projectile au ralenti.\r\n\r\nL\u2019utilisateur a aussi acc\u00E8s \u00E0 un mode scientifique ou il a le choix de soit afficher le vecteur vitesse du \r\nprojectile ou le vecteur acc\u00E9l\u00E9ration du projectile pendant qu\u2019il se d\u00E9place. Ce mode est d\u00E9s-activable ou\r\n activable a la guise de l\u2019utilisateur.\r\n\r\nEnfin, le joueur peut en tout temps retourner au menu principal ou quitter l\u2019application \u00E0 l\u2019aide des\r\n boutons retour ou quitter disponibles \u00E0 droite compl\u00E8tement de la fen\u00EAtre.\r\n\r\n");
+		txtrAprsEssais.setBounds(0, 400, 1233, 369);
+		add(txtrAprsEssais);
+		
+
+	
+// source http://www.psdgraphics.com/graphics/colorful-3d-crystal-balls/
+	}
+}

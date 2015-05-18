@@ -1,0 +1,95 @@
+package instructions;
+
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import java.awt.Color;
+
+import java.awt.Dimension;
+import javax.swing.JTextArea;
+import java.awt.Font;
+import java.awt.SystemColor;
+import javax.swing.ScrollPaneConstants;
+/**
+ * Classe graphique utilisée pour afficher un menu d'instruction a l'utilisateur
+ * @author Edouard
+ * @version 04/03/14
+ */
+public class Instructions extends JPanel  {
+
+	private static final long serialVersionUID = 1L;
+	private JTabbedPane Pane;
+	private JPanel Utilisation;
+	private JPanel Concept;
+	private JPanel Sources;
+	private JPanel Apropos;
+	private JLabel lblNewLabel;
+	private JTextArea txtrGravitlectriqueEst_1;
+	private JPanel panel;
+	private JScrollPane scrollPane;
+
+	public Instructions(){
+		setLayout(null);		
+		setBackground(Color.lightGray);
+		Pane = new JTabbedPane(JTabbedPane.TOP);
+		Pane.setToolTipText("Utilisation");
+		Pane.setBounds(0, 50, 1250, 1250);
+		add(Pane);
+		
+		Utilisation = new JPanel();
+		Utilisation.setPreferredSize(new Dimension(1250,1250));
+		Pane.addTab("Utilisation", null, Utilisation, null);
+		Utilisation.setLayout(null);
+		
+		scrollPane = new JScrollPane();
+		scrollPane.setAutoscrolls(true);
+		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollPane.setBounds(0, 0, 1250, 550);
+		scrollPane.setPreferredSize(new Dimension(1000,600));
+		Utilisation.add(scrollPane);
+		
+		panel = new JPanel();
+		panel.setPreferredSize(new Dimension(1250,1169));
+		scrollPane.setViewportView(panel);
+		panel.setLayout(null);
+		//Utilisation.add(utilisation);
+		txtrGravitlectriqueEst_1 = new JTextArea();
+		txtrGravitlectriqueEst_1.setBounds(0, 0, 1220, 300);
+		panel.add(txtrGravitlectriqueEst_1);
+		txtrGravitlectriqueEst_1.setEditable(false);
+		txtrGravitlectriqueEst_1.setForeground(Color.WHITE);
+		txtrGravitlectriqueEst_1.setFont(new Font("Franklin Gothic Medium", Font.PLAIN, 21));
+		txtrGravitlectriqueEst_1.setBackground(SystemColor.controlDkShadow);
+		txtrGravitlectriqueEst_1.setText(" Gravit\u00E9 \u00E9lectrique est un jeu interactif qui permet \u00E0 l\u2019utilisateur d\u2019en apprendre plus sur la\r\n physique m\u00E9canique et \u00E9lectrique.  Les instructions qui concernent l\u2019utilisation de notre\r\n application est s\u00E9par\u00E9e en deux parties la premi\u00E8re concerne la fa\u00E7on dont l\u2019utilisateur joue \r\n et la seconde comment  l\u2019utilisateur doit utiliser l\u2019\u00E9diteur de niveaux\r\n\r\n Mode Jouer : Pour jouer l\u2019utilisateur dispose d\u2019un canon non d\u00E9pla\u00E7able mais dont le \r\n canon est amovible donc l\u2019utilisateur peut choisir l\u2019angle avec lequel il voudra tirer vers la\r\n cible voici une repr\u00E9sentation photo du canon : ");
+			
+		Concept = new JPanel();
+		Pane.addTab("Concept", null, Concept, null);
+		Concept.setLayout(null);
+
+		
+		lblNewLabel = new JLabel("Concept");
+		lblNewLabel.setBounds(144, 152, 46, 14);
+		Concept.add(lblNewLabel);
+		
+		Apropos = new JPanel();
+		Pane.addTab("Apropos", null, Apropos, null);
+		Apropos.setLayout(null);
+
+		lblNewLabel = new JLabel("Apropos");
+		lblNewLabel.setBounds(144, 152, 46, 14);
+		Apropos.add(lblNewLabel);
+		
+		Sources = new JPanel();
+		Pane.addTab("Sources", null, Sources, null);
+		Sources.setLayout(null);
+		
+		lblNewLabel = new JLabel("Sources");
+		lblNewLabel.setBounds(144, 152, 46, 14);
+		Sources.add(lblNewLabel);
+
+
+	
+// source http://www.psdgraphics.com/graphics/colorful-3d-crystal-balls/
+	}
+}

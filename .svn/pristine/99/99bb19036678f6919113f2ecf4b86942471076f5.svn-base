@@ -1,0 +1,5 @@
+package composant.menu.depart;
+
+public enum TypeDAction {
+	JOUER, CREER, INSTRUCTION, QUITTER;
+}

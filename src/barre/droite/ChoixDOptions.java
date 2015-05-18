@@ -1,0 +1,277 @@
+package barre.droite;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.event.EventListenerList;
+
+import barre.droite.Bouton;
+/**
+ * Classe graphique utilisee permettant de faire  un choix dans la barre latérale droit
+ * @author Jude Fort
+ * @version 04/03/14
+ */
+
+public class ChoixDOptions extends JPanel {
+	private static final long serialVersionUID = 1L;
+
+	private final EventListenerList ecouteurs = new EventListenerList();
+	private Bouton quitter,retour,undo,play,help;
+	private JLabel labelQuitter, labelRetour, labelUndo, labelPlay,labelHelp;
+	/**
+	 * Constructeur du composant	 
+	 */
+	public ChoixDOptions(){
+		setLayout(null);
+		setPreferredSize(new Dimension(100, 650));
+		setBackground(Color.white);
+		ajouterBoutonsEtLesEcouteurs();
+		ajouterLesEtiquettes();
+	}
+	/**
+	 * Ajoute un ecouteur a la liste des ecouteurs
+	 * @param OptionListener ecout	 
+	 */
+	public void addChoixDOptionListener(OptionsListener ecout){
+		ecouteurs.add(OptionsListener.class, ecout);
+	}
+	/**
+	 * Lance l'evenement une fois choisi
+	 * @param TypeDOption opt	 
+	 */
+	private void lancerEvenUneOptionChoisie(TypeDOption opt){
+		for(OptionsListener ecout : ecouteurs.getListeners(OptionsListener.class)){
+			ecout.uneOptionChoisie(opt);
+		}
+	}
+	/**
+	 * Methode privee permettant d'ajouter les boutons
+	 * @param OptionListener ecout	 
+	 */
+	private void ajouterBoutonsEtLesEcouteurs(){
+		quitter=(new Bouton());
+		quitter.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				//debut
+				lancerEvenUneOptionChoisie(TypeDOption.QUITTER);
+				//fin
+			}
+		});
+		quitter.setBounds(25, 500, 50, 50);
+		add(quitter);
+
+		retour=new Bouton();				
+		retour.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				//debut
+				lancerEvenUneOptionChoisie(TypeDOption.RETOUR);
+				//fin
+			}
+		});
+		retour.setbutton("retour");
+		retour.setBounds(25, 400, 50, 50);
+		add(retour);
+
+		play=new Bouton();			
+		play.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				//debut
+				lancerEvenUneOptionChoisie(TypeDOption.JOUER);
+				//fin
+			}
+		});
+		play.setbutton("play");
+		play.setBounds(25, 100, 50, 50);
+		add(play);
+
+		undo=new Bouton();			
+		undo.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				//debut
+				lancerEvenUneOptionChoisie(TypeDOption.REINITIALISER);
+				//fin
+			}
+		});
+		undo.setbutton("reinitialiser");
+		undo.setBounds(25, 200, 50, 50);
+		add(undo);
+
+		help=new Bouton();			
+		help.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				//debut
+				lancerEvenUneOptionChoisie(TypeDOption.AIDE);
+				//fin
+			}
+		});
+		help.setbutton("aide");
+		help.setBounds(25, 300, 50, 50);
+		add(help);
+	}
+	/**
+	 * Methode privee pour ajouter les etiquettes sur la barre laterale
+	 */
+	private void ajouterLesEtiquettes(){
+		labelPlay = new JLabel("  Jouer");
+		labelPlay.setBounds(25,75,100,25);
+		add(labelPlay);
+
+		labelUndo = new JLabel(" Retour");
+		labelUndo.setBounds(25,175,100,25);
+		add(labelUndo);
+
+		labelHelp = new JLabel("   Aide");
+		labelHelp.setBounds(25,275,100,25);
+		add(labelHelp);
+
+		labelRetour = new JLabel("  Menu");
+		labelRetour.setBounds(25,375,100,25);
+		add(labelRetour);
+
+		labelQuitter = new JLabel(" Quitter");
+		labelQuitter.setBounds(25,475,100,25);
+		add(labelQuitter);
+
+
+	}
+	/**
+	 * Methode retournant le bouton quitter	 
+	 */
+	public Bouton getBoutonQuitter() {
+		return quitter;
+	}
+	/**
+	 * Methode qui permet de modifier le bouton quitter
+	 * @param Bouton quitter 
+	 */
+	public void setBoutonQuitter(Bouton quitter) {
+		this.quitter = quitter;
+	}
+	/**
+	 * Methode retournant le bouton retour	 
+	 */
+	public Bouton getBoutonRetour() {
+		return retour;
+	}
+	/**
+	 * Methode qui permet de modifier le bouton retour
+	 * @param Bouton retour 
+	 */
+	public void setBoutonRetour(Bouton retour) {
+		this.retour = retour;
+	}
+
+	/**
+	 * Methode retournant le bouton undo	 
+	 */
+	public Bouton getBoutonUndo() {
+		return undo;
+	}
+	/**
+	 * Methode qui permet de modifier le bouton undo
+	 * @param Bouton undo
+	 */
+	public void setBoutonUndo(Bouton undo) {
+		this.undo = undo;
+	}
+
+	/**
+	 * Methode retournant le bouton jouer	 
+	 */
+	public Bouton getBoutonJouer() {
+		return play;
+	}
+	/**
+	 * Methode qui permet de modifier le bouton jouer
+	 * @param Bouton undo
+	 */
+	public void setBoutonJouer(Bouton play) {
+		this.play = play;
+	}
+	/**
+	 * Methode retournant le bouton AIDE	 
+	 */
+	public Bouton getBoutonAide() {
+		return help;
+	}
+	/**
+	 * Methode qui permet de modifier le bouton aide
+	 * @param Bouton aide
+	 */
+	public void setBoutonAide(Bouton aide) {
+		this.help = aide;
+	}
+	/**
+	 * Methode retournant le label Quitter
+	 */
+	public JLabel getLabelQuitter() {
+		return labelQuitter;
+	}
+	/**
+	 * Methode qui permet de modifier le label aide
+	 * @param labelQuitter the labelQuitter to set
+	 */
+	public void setLabelQuitter(JLabel labelQuitter) {
+		this.labelQuitter = labelQuitter;
+	}
+	/**
+	 * Methode retournant le label Retour
+	 */
+	public JLabel getLabelRetour() {
+		return labelRetour;
+	}
+	/**
+	 * Methode qui permet de modifier le label retour
+	 * @param labelRetour the labelRetour to set
+	 */
+	public void setLabelRetour(JLabel labelRetour) {
+		this.labelRetour = labelRetour;
+	}
+	/**
+	 *  Methode retournant le label Undo
+	 */
+	public JLabel getLabelUndo() {
+		return labelUndo;
+	}
+	/**
+	 * Methode qui permet de modifier le label undo
+	 * @param labelUndo the labelUndo to set
+	 */
+	public void setLabelUndo(JLabel labelUndo) {
+		this.labelUndo = labelUndo;
+	}
+	/**
+	 * 
+	 *  Methode retournant le label Play
+	 */
+	public JLabel getLabelPlay() {
+		return labelPlay;
+	}
+	/**
+	 * Methode qui permet de modifier le label play
+	 * @param labelPlay the labelPlay to set
+	 */
+	public void setLabelPlay(JLabel labelPlay) {
+		this.labelPlay = labelPlay;
+	}
+	/**
+	 *  Methode retournant le label aide
+	 */
+	public JLabel getLabelHelp() {
+		return labelHelp;
+	}
+	/**
+	 * Methode qui permet de modifier le label aide
+	 * @param labelHelp the labelHelp to set
+	 */
+	public void setLabelHelp(JLabel labelHelp) {
+		this.labelHelp = labelHelp;
+	}
+
+
+}	

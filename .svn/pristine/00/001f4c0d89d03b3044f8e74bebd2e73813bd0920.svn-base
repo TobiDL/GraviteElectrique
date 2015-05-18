@@ -1,0 +1,51 @@
+package fenetre;
+
+import javax.swing.BorderFactory;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JDialog;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.border.Border;
+
+import java.beans.*;
+import java.awt.*;
+import java.awt.event.*;
+
+public class FenetreDeModification extends JDialog{
+	private String texteEntree1 ;
+	private String texteEntree2 ;
+	
+	private JTextField largeur;
+	private JTextField hauteur;
+	
+	private JOptionPane optionPane;
+	
+	private String btnLargeur = "OK";
+	private String btnHauteur = "Annuler";
+	
+	public FenetreDeModification(Frame unFrame){
+		super(unFrame, true);
+		
+		setTitle("Modification");
+		
+		largeur = new JTextField();
+		hauteur = new JTextField();
+		
+		Object[] array = {texteEntree1, largeur, texteEntree2, hauteur};
+		Object[] options = {btnLargeur, btnHauteur};
+		
+		optionPane = new JOptionPane(array,JOptionPane.QUESTION_MESSAGE,JOptionPane.YES_NO_OPTION,null,options,options[0]);
+		setContentPane(optionPane);
+		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+		
+		addComponentListener(new ComponentAdapter() {
+            public void componentShown(ComponentEvent ce) {
+                largeur.requestFocusInWindow();
+            }
+        });
+
+	}
+
+	
+}

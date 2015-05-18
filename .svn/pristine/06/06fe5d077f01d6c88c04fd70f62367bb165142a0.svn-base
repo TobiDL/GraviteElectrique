@@ -1,0 +1,98 @@
+package interfaces.graphiques.autres;
+
+import java.awt.Graphics;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.border.MatteBorder;
+import java.awt.Color;
+import javax.swing.JScrollBar;
+import javax.swing.JLabel;
+/**
+ * Classe graphique utilisée pour afficher un menu d'instruction a l'utilisateur
+ * @author Edouard
+ * @version 04/03/14
+ */
+public class Instructions extends JPanel {
+
+	private static final long serialVersionUID = 1L;
+	private JTabbedPane Pane;
+	private JPanel Utilisation;
+	private JPanel Concept;
+	private JPanel Sources;
+	private JPanel Apropos;
+	private JScrollBar scrollBar;
+	private JLabel lblNewLabel;
+
+	public Instructions(){
+		setLayout(null);		
+		setBackground(Color.white);
+		
+		Pane = new JTabbedPane(JTabbedPane.TOP);
+		Pane.setToolTipText("Utilisation");
+		Pane.setBounds(0, 50, 1250, 650);
+		add(Pane);
+		
+		scrollBar = new JScrollBar();
+		scrollBar.setBounds(1228, 0, 17, 575);
+
+		
+		Utilisation = new JPanel();
+		Pane.addTab("Utilisation", null, Utilisation, null);
+		Utilisation.setLayout(null);
+		scrollBar = new JScrollBar();
+		scrollBar.setBounds(1195, 0, 17, 500);
+		Utilisation.add(scrollBar);
+		
+		lblNewLabel = new JLabel("Instruction");
+		lblNewLabel.setBounds(144, 152, 46, 14);
+		Utilisation.add(lblNewLabel);
+				
+		Concept = new JPanel();
+		Pane.addTab("Concept", null, Concept, null);
+		Concept.setLayout(null);
+		scrollBar = new JScrollBar();
+		scrollBar.setBounds(1195, 0, 17, 500);
+		Concept.add(scrollBar);
+		
+		lblNewLabel = new JLabel("Concept");
+		lblNewLabel.setBounds(144, 152, 46, 14);
+		Concept.add(lblNewLabel);
+		
+		Apropos = new JPanel();
+		Pane.addTab("Apropos", null, Apropos, null);
+		Apropos.setLayout(null);
+		scrollBar = new JScrollBar();
+		scrollBar.setBounds(1195, 0, 17, 500);
+		Apropos.add(scrollBar);
+		
+		lblNewLabel = new JLabel("Apropos");
+		lblNewLabel.setBounds(144, 152, 46, 14);
+		Apropos.add(lblNewLabel);
+		
+		Sources = new JPanel();
+		Pane.addTab("Sources", null, Sources, null);
+		Sources.setLayout(null);
+		
+		lblNewLabel = new JLabel("Sources");
+		lblNewLabel.setBounds(144, 152, 46, 14);
+		Sources.add(lblNewLabel);
+		
+		scrollBar = new JScrollBar();
+		scrollBar.setBounds(1195, 0, 17, 500);
+		Sources.add(scrollBar);
+		
+	
+// source http://www.psdgraphics.com/graphics/colorful-3d-crystal-balls/
+	}
+	/**
+	 * Methode utilsee pour dessiner les composant du composant Instructions
+	 * @param Graphics g
+	 */
+	@Override
+	public void paintComponent(Graphics g){
+		super.paintComponent(g);
+		//Graphics2D g2d = (Graphics2D) g;
+		
+	}
+}

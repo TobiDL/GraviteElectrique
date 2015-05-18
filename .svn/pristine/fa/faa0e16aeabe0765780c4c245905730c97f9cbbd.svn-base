@@ -1,0 +1,115 @@
+package interfaces.graphiques.autres;
+
+import java.awt.Graphics;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+import java.awt.Color;
+import javax.swing.JScrollBar;
+import javax.swing.JLabel;
+import javax.swing.JTextArea;
+import java.awt.Font;
+import java.awt.Cursor;
+import java.util.Locale;
+import java.awt.SystemColor;
+/**
+ * Classe graphique utilisée pour afficher un menu d'instruction a l'utilisateur
+ * @author Edouard
+ * @version 04/03/14
+ */
+public class Instructions extends JPanel {
+
+	private static final long serialVersionUID = 1L;
+	private JTabbedPane Pane;
+	private JPanel Utilisation;
+	private JPanel Concept;
+	private JPanel Sources;
+	private JPanel Apropos;
+	private JScrollBar scrollBar;
+	private JLabel lblNewLabel;
+
+	public Instructions(){
+		setLayout(null);		
+		setBackground(Color.white);
+		
+		Pane = new JTabbedPane(JTabbedPane.TOP);
+		Pane.setToolTipText("Utilisation");
+		Pane.setBounds(0, 50, 1250, 650);
+		add(Pane);
+		
+		scrollBar = new JScrollBar();
+		scrollBar.setBounds(1228, 0, 17, 575);
+
+		
+		Utilisation = new JPanel();
+		Pane.addTab("Utilisation", null, Utilisation, null);
+		Utilisation.setLayout(null);
+		scrollBar = new JScrollBar();
+		scrollBar.setBounds(1195, 0, 17, Pane.getHeight());
+		Utilisation.add(scrollBar);
+		
+		
+		JTextArea txtrGravitlectriqueEst = new JTextArea();
+		txtrGravitlectriqueEst.setWrapStyleWord(true);
+		txtrGravitlectriqueEst.setLocale(Locale.CANADA_FRENCH);
+		txtrGravitlectriqueEst.setLineWrap(true);
+		txtrGravitlectriqueEst.setEditable(false);
+		txtrGravitlectriqueEst.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+		txtrGravitlectriqueEst.setBorder(null);
+		txtrGravitlectriqueEst.setFont(new Font("Shruti", Font.BOLD, 20));
+		txtrGravitlectriqueEst.setForeground(Color.BLACK);
+		txtrGravitlectriqueEst.setBounds(0, 0, Pane.getWidth(), Pane.getHeight()*2);
+		txtrGravitlectriqueEst.setBackground(SystemColor.menu);
+		txtrGravitlectriqueEst.setText(" Gravit\u00E9 \u00E9lectrique est un jeu interactif permettant \u00E0 l\u2019utilisateur d\u2019en apprendre plus sur la\r\n physique m\u00E9canique et \u00E9lectrique.  Les instructions qui concernent l\u2019utilisation de notre\r\n application est s\u00E9par\u00E9e en deux parties la premi\u00E8re concerne la fa\u00E7on dont l\u2019utilisateur joue  et la\r\n seconde comment  l\u2019utilisateur doit utiliser l\u2019\u00E9diteur de niveaux.\r\n");
+		
+		txtrGravitlectriqueEst.append("Mode Jouer : ");
+		Utilisation.add(txtrGravitlectriqueEst);
+				
+		Concept = new JPanel();
+		Pane.addTab("Concept", null, Concept, null);
+		Concept.setLayout(null);
+		scrollBar = new JScrollBar();
+		scrollBar.setBounds(1195, 0, 17, 500);
+		
+		Concept.add(scrollBar);
+		
+		lblNewLabel = new JLabel("Concept");
+		lblNewLabel.setBounds(144, 152, 46, 14);
+		Concept.add(lblNewLabel);
+		
+		Apropos = new JPanel();
+		Pane.addTab("Apropos", null, Apropos, null);
+		Apropos.setLayout(null);
+		scrollBar = new JScrollBar();
+		scrollBar.setBounds(1195, 0, 17, 500);
+		Apropos.add(scrollBar);
+		
+		lblNewLabel = new JLabel("Apropos");
+		lblNewLabel.setBounds(144, 152, 46, 14);
+		Apropos.add(lblNewLabel);
+		
+		Sources = new JPanel();
+		Pane.addTab("Sources", null, Sources, null);
+		Sources.setLayout(null);
+		
+		lblNewLabel = new JLabel("Sources");
+		lblNewLabel.setBounds(144, 152, 46, 14);
+		Sources.add(lblNewLabel);
+		
+		scrollBar = new JScrollBar();
+		scrollBar.setBounds(1195, 0, 17, 500);
+		Sources.add(scrollBar);
+		
+	
+// source http://www.psdgraphics.com/graphics/colorful-3d-crystal-balls/
+	}
+	/**
+	 * Methode utilsee pour dessiner les composant du composant Instructions
+	 * @param Graphics g
+	 */
+	@Override
+	public void paintComponent(Graphics g){
+		super.paintComponent(g);
+		//Graphics2D g2d = (Graphics2D) g;
+		
+	}
+}

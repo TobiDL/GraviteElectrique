@@ -1,0 +1,493 @@
+package objets.graphiques;
+
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Shape;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Ellipse2D;
+import java.io.IOException;
+import javax.imageio.ImageIO;
+
+import obstacles.ObstacleElectrique;
+import obstacles.ObstaclePhysique;
+
+/**
+ * Classe graphique servant a dessiner le projectile
+ * @author Jude Fort et Edouard
+ */
+
+public class Projectile {
+	private double rayon; // en metres
+	private double charge; // en C
+	private double masse; // en Kg
+	private Ellipse2D.Double projectile;
+	private double vitesseX, vitesseY, accelerationX, accelerationY,modifAX=0,modifAY=0;
+	private double posX , posY;
+	private boolean enCollision,enCollisionElec;
+	private Image sProjectileOrange,sProjectileBleu,sProjectileRouge;
+	private Shape sProj ;
+
+	/**
+	 * Constructeur du projectile pour l'initialiser 
+	 * @param charge : la charge initiale du projectile
+	 * @param vitesseX : la vitesse initiale en X du projectile
+	 * @param vitesseY : la vitesse initiale en Y du projectile
+	 * @param posX : la position en X du projectile
+	 * @param posY : la position en Y du projectile
+	 */
+	public Projectile(double charge, double vitesseX, double vitesseY, double posX, double posY){
+		this.charge = charge;
+		this.vitesseX = vitesseX;
+		this.vitesseY = vitesseY;
+		this.posX = posX;
+		this.posY = posY;
+		accelerationX = 0;
+		accelerationY = 9.8;
+		rayon = 12;
+		masse = 0.5;
+		enCollision=false;
+		enCollisionElec=false;
+		lireImage();
+	}
+	/**
+	 * Methode servant a creer le projectile	
+	 * @param matransfo
+	 */
+	public void creer(AffineTransform matTransfo){			
+		projectile = new Ellipse2D.Double(posX, posY, rayon+10, rayon+10);
+		sProj = matTransfo.createTransformedShape(projectile);		
+	}
+	/**
+	 * Methode servant a dessiner le projectile
+	 * @param g2d
+	 * @param matransfo
+	 */
+	public void dessiner(Graphics2D g2d,AffineTransform matTransfo){
+
+		Color couleurTemp = g2d.getColor();
+
+		if(charge >0){
+			g2d.drawImage(sProjectileRouge, (int)sProj.getBounds2D().getX(),(int)sProj.getBounds2D().getY(), (int)sProj.getBounds2D().getWidth()-6, (int)sProj.getBounds2D().getHeight()-6,null);
+			g2d.setColor(new Color(255,0,0,255));}
+
+		if(charge<0){
+			g2d.drawImage(sProjectileBleu, (int)sProj.getBounds2D().getX(),(int)sProj.getBounds2D().getY(), (int)sProj.getBounds2D().getWidth()-6, (int)sProj.getBounds2D().getHeight()-6,null);
+			g2d.setColor(new Color(0,128,128,255));}
+
+		if(charge==0){
+			g2d.drawImage(sProjectileOrange, (int)sProj.getBounds2D().getX(),(int)sProj.getBounds2D().getY(), (int)sProj.getBounds2D().getWidth()-6, (int)sProj.getBounds2D().getHeight()-6,null);
+			g2d.setColor(new Color(255,215,0,255));}
+
+		projectile = new Ellipse2D.Double(posX, posY, rayon, rayon);
+
+		g2d.fill(matTransfo.createTransformedShape(projectile));			
+		g2d.setColor(couleurTemp);
+	}
+	/**
+	 * Methode servant a modifier la masse 
+	 * @param masse
+	 */
+	public void setCharge(double charge){
+		this.charge = charge;
+	}
+	/**
+	 * Methode mise en place pour modifier la vitesse du projectile
+	 * @param vitesseX
+	 * @param vitesseY
+	 */
+	public void setVitesse(double vitesseX, double vitesseY){
+		this.vitesseX = vitesseX;
+		this.vitesseY = vitesseY;
+	}
+	/**
+	 * methode qui permet de faire le projectile se déplacer en fonction du temps entré
+	 */
+	public void deplacerLeProjectile(double temps){		
+		// position en x
+		double posX0=posX;		
+		double vix0=vitesseX;
+		double accx0=accelerationX+modifAX;
+		//double temp0=temps;
+
+		/*
+		double posXI=posX0 +vix0*temps;
+		double vixI=vix0+accx0*temps;
+		double tempsI= temp0 +temps;*/
+		//	double accxI=accx0;
+
+		/*	double posX2= posX0 + vix0*(temps/2)+ (0.5*accx0*(temps/2)*(temps/2));
+		double vix2= vix0 + (0.75*accx0+ 0.25*accxI)*(temps/2);
+		double temp2= temp0 + (temps/2);*/
+		double accx2=accx0;
+
+		/*	double posXF= posX0 + vix0*(temps)+ (0.5*accx0*(temps)*(temps));
+		double vixF= vix0 + (0.5*accx0+ 0.5*accxI)*(temps);
+		double tempF= temp0 + (temps);*/
+		double accF=accx0;
+
+		posX= posX0 + vix0*(temps)+(0.33*accx0 + 0.66*accx2)*( 0.5*(temps)*(temps));
+		vitesseX= vix0 + ((1.0/6.0)*accx0+(4.0/6.0)*accx2+(1.0/6.0)*accF)*temps;	
+
+
+		// en y
+		double posy0=posY;		
+		double viy0=vitesseY;
+		double accy0=accelerationY+modifAY;
+		//double temp01=temps;
+
+		// y
+		/*double posYI=posy0 +viy0*temps;
+		double viyI=viy0+accy0*temps;
+		double tempsI1= temp01 +temps;*/
+		//	double accyI=accy0;
+
+		/*double posy2= posy0 + viy0*(temps/2)+ (0.5*accy0*(temps/2)*(temps/2));
+		double viy2= viy0 + (0.75*accy0+ 0.25*accyI)*(temps/2);
+		double temp21= temp01 + (temps/2);*/
+		double accy2=accy0;
+
+		/*	double posyF= posy0 + viy0*(temps)+ (0.5*accy0*(temps)*(temps));
+		double viyF= viy0 + (0.5*accy0+ 0.5*accyI)*(temps);
+		double tempF1= temp01 + (temps);*/
+		double accyF=accy0;
+
+
+		//System.out.println("1: "+viy0*(temps));
+		//	System.out.println("2: "+(0.33*accy0 + 0.66*accy2)*( 0.5*(temps)*(temps)));
+		//	System.out.println("3: "+posY);
+		posY= posy0 + viy0*(temps)+(0.33*accy0 + 0.66*accy2)*( 0.5*(temps)*(temps));
+		vitesseY=( viy0 + ((1.0/6.0)*accy0+(4.0/6.0)*accy2+(1/6.0)*accyF)*temps);
+		//System.out.println("4 posY: "+ posY);
+	}
+
+	/**
+	 * methode appelle lorsqu'il y a une colision entre un objet physique et le projectile
+	 */
+	public void collisonPhysique(ObstaclePhysique obsPhy){
+		double vitesseXF,vitesseYF,masseObs;
+		double posXObs, posYObs,bas;
+		masseObs=obsPhy.getMasse();
+		posXObs=obsPhy.getPosX();
+		posYObs=obsPhy.getPosY();
+		if(obsPhy.getHauteur()<100 && obsPhy.getRayon()<25){
+			bas=posYObs+obsPhy.getHauteur()*0.2+ obsPhy.getRayon()*0.3;
+		} else {
+			bas=posYObs+obsPhy.getHauteur()*0.98+ obsPhy.getRayon()*0.85;
+		}
+		vitesseXF = ((1-(masseObs/masse)) / (1+(masseObs/masse) )) * vitesseX;
+		vitesseYF = ((1-(masseObs/masse)) / ( 1+(masseObs/masse) )) * vitesseY;	
+
+		double grandeurVitesse = Math.sqrt(vitesseX* vitesseX + vitesseY*vitesseY);
+		System.out.println(vitesseX+" X  avant y:,"+vitesseY);		
+		if(!enCollision){		
+			if(obsPhy.getRayon()==0){	
+				vitesseX=vitesseXF;
+				vitesseY=-vitesseYF;
+				if(posY<posYObs){
+					//System.out.println("posY<posYObs");
+					vitesseX=-vitesseXF;
+					vitesseY=vitesseYF;
+				}			
+				if(posY>bas){	
+					//	System.out.println("posY>posYObs");
+					vitesseX=-vitesseXF;
+					vitesseY=vitesseYF;
+				}
+				posX= posX + vitesseX;
+				posY = posY + vitesseY;
+
+			}
+
+			// cercle
+			if(obsPhy.getRayon()!=0){				
+				//	 # normal vector
+				//     n = vector(x - circle_x, y - circle_y)
+				//      n = n * (1 / normal.magnitude)
+				double x,y;	
+				x=(posX+rayon)-(posXObs+obsPhy.getRayon());
+				y=(posY+rayon)-(posYObs+obsPhy.getRayon());			
+				VecteurGraphique n= new VecteurGraphique(x,y);					
+				n=n.unitaire();
+				//	# velocity vector
+				//	v = vector(velocity_x, velocity_y)
+				//	velocity_magnitude = v.magnitude
+				//	v = v * (1 / v.magnitude)
+				VecteurGraphique v= new VecteurGraphique(vitesseX,-vitesseY);
+				v=v.unitaire();
+				System.out.println("v avant : "+ v);
+				System.out.println("angle avant +"+ v.angle(n.getX(),n.getY()));
+				//	# inverse velocity vector
+				//	e = vector(- velocity_x, - velocity_y)
+				//	e = e * (1 / e.magnitude)
+				VecteurGraphique inver= new VecteurGraphique(-vitesseX,vitesseY);
+				inver=inver.unitaire();
+				//	# new velocity direction
+				//	r = v + n * (2 * scalar_product(e, n))
+				//n.multiplicationParK(2*(inver.produitScalaire(n.getX(),n.getY())));
+				//v.additionnerLesVecteurs(n);
+				v=v.additionnerLesVecteurs(n.multiplicationParK(2*(inver.produitScalaire(n.getX(),n.getY()))));
+				System.out.println("angle apres +"+ v.angle(n.getX(),n.getY()));
+				//# new velocity
+				//	new_velocity = r * velocity_magnitude
+				System.out.println("grandeurvitesse"+ grandeurVitesse);
+				v=v.multiplicationParK(grandeurVitesse);
+				System.out.println("v: "+ v);
+
+				//# now set the new velocity to something new			
+				vitesseX=v.getX();
+				vitesseY=v.getY();
+				System.out.println("vitesse X "+ vitesseX);
+				System.out.println("vitesse Y "+ vitesseY);
+
+				//    # calculate a unit vector from the center of the circle to the center of the particle
+				//# calculate a unit vector from the center of the circle to the center of the particle
+				//   normal = vector(x - circle_x, y - circle_y)
+				//   normal = normal * (1 / normal.magnitude)
+				double centreX,centreY;		
+				centreX=(posX+rayon)-(posXObs+obsPhy.getRayon());
+				centreY=(posY+rayon)-(posYObs+obsPhy.getRayon());			
+				VecteurGraphique n1= new VecteurGraphique(x,y);
+				n1=n1.unitaire();
+				//     # calculate the distance between the particle and the circle
+				//double  dx = posX - circle_x
+				// double  dy = posY - circle_y
+				double distance = Math.sqrt(centreX*centreX+centreY*centreY);
+				System.out.println("dist: "+distance);	
+				//  # calculate the adjustment needed to move the particle outside the circle
+				//   # the "+ 1" part just makes sure the particle is *completely* outside the circle
+				// adjustment = particle_radius + circle_radius - distance + 1
+				double modif= rayon + obsPhy.getRayon() - distance + 1; 
+				// # move the particle
+				System.out.println("modif: "+modif);				
+				posX= posX + n1.getX() * modif;
+				posY = posY + n1.getY() * modif;				
+
+				System.out.println(posX+" x  position ,y :"+posY);	
+			}
+
+
+			System.out.println(vitesseX+" X  apres y:,"+vitesseY);		
+			enCollision=true ;	
+
+		}
+	}	
+	/**
+	 * methode appelle lorsqu'il y a une collision entre un objet electrique et le projectile
+	 */
+	public void collisionElectrique( ObstacleElectrique obsE){
+		//accelerationY = (charge * champElectrique)/(masse);
+		//accelerationX = (charge * champElectrique)/(masse);
+		Integer champObs=obsE.getCharge();
+		double posXObs=obsE.getPosX(),posYObs=obsE.getPosY();
+		if(!enCollisionElec){
+			if(charge!=0 && champObs!=0){
+				double pourcentage=1;
+				if((charge>0 && champObs<0) || (charge<0 && champObs>0)){
+					// attraction
+					if(posX>posXObs){				
+						modifAX= -(Math.abs((charge*champObs)/masse))*pourcentage+modifAX;
+					}
+					if(posX<posXObs){
+						modifAX=(Math.abs((charge*champObs)/masse))*pourcentage+modifAX;
+					}
+					if(posY>posYObs){
+						modifAY=-(Math.abs((charge*champObs)/masse))*pourcentage+modifAY;
+					}
+					if(posY<posYObs){
+						modifAY=(Math.abs((charge*champObs)/masse))*pourcentage+modifAY;
+					}
+				} // fin atttraction
+				if((charge>0 && champObs>0) || (charge<0 && champObs<0)) {
+					//repulsion
+					if(posX>posXObs){			
+						modifAX=(Math.abs((charge * champObs)/masse))*pourcentage+modifAX;
+					}
+					if(posX<posXObs){			
+						modifAX=-(Math.abs((charge * champObs)/masse))*pourcentage+modifAX;
+					}
+					if(posY>posYObs){
+						modifAY=(Math.abs((charge * champObs)/masse))*pourcentage+modifAY;
+					}
+					if(posY<posYObs){
+						modifAY=-(Math.abs((charge * champObs)/masse))*pourcentage+modifAY;
+					}
+				} // fin repulsion
+			} 
+			System.out.println("collision Electrique");
+			enCollisionElec=true;
+			// fin if
+		}
+	}
+	/**
+	 * Methode retounant la shape du projectile
+	 * @return
+	 */
+	public Shape getShape() {
+		return sProj;
+	}
+	/**
+	 * Methode retablissant les parametres	 
+	 */
+	public void retablir() {
+		accelerationX = 0;
+		accelerationY = 9.8;		
+		modifAX=0;
+		modifAY=0;
+		//enCollision=false ;
+	}
+	/**
+	 * Methode determinant si le projectile est en collision 
+	 */
+	public boolean isEnCollision() {
+		return enCollision;
+	}
+	/**
+	 * Methode settant si le projectile est en collision 
+	 * @param enCollision
+	 */
+	public void setEnCollision(boolean enCollision) {		
+		this.enCollision = enCollision;
+	}
+	/**
+	 * Methode determinant si le projectile est en collision electrique
+	 */
+	public boolean isEnCollisionElec() {
+		return enCollisionElec;
+	}
+	/**
+	 * Methode settant si le projectile est en collision electrique
+	 * @param enCollision
+	 */
+	public void setEnCollisionElec(boolean enCollisionElec) {		
+		this.enCollisionElec = enCollisionElec;
+	}
+	/**
+	 * Methode retournant la force du vecteur
+	 */
+	public double getForceVecteur(){
+		return Math.sqrt(Math.pow(vitesseX, 2)+Math.pow(vitesseY, 2));
+	}
+	/**
+	 * Methode retournant l'rientation du vecteur en fonction de la vitesse en X et en Y
+	 */
+	public double getOrientationVecteur(){
+		return Math.atan2(vitesseY,vitesseX);		
+	}
+	/**
+	 * Methode retournant la force de l'acceleration
+	 */
+	public double getForceAcceleration(){
+		return Math.sqrt(Math.pow(accelerationX+modifAX, 2)+Math.pow(accelerationY+modifAY, 2));
+	}
+	/**
+	 * Methode retournant l'rientation du vecteur en fonction de l'acceleration en X et en Y
+	 */
+	public double getOrientationAcceleration(){
+		return Math.atan2(accelerationY+modifAY, accelerationX+modifAX);	
+	}
+	/**
+	 * Methode retounant la vitesse du projectile
+	 * @return vitesseX
+	 */
+	public double getVitesseX() {
+		return vitesseX;
+	}
+	/**
+	 * Methode permettant de modifier la vitesse en X du projectile
+	 * @param vitesseX
+	 */
+	public void setVitesseX(double vitesseX) {
+		this.vitesseX = vitesseX;
+	}
+	/**
+	 * Methode qui retourne la vitesse en Y du projectile
+	 * @return vitesseY
+	 */
+	public double getVitesseY() {
+		return vitesseY;
+	}
+	/**
+	 * Methode qui permet de modifier la vitesse en Y
+	 * @param vitesseY
+	 */
+	public void setVitesseY(double vitesseY) {
+		this.vitesseY = vitesseY;
+	}
+	/**
+	 * Methode qui retourne l'acceleration en X du projectile
+	 * @return
+	 */
+	public double getAccelerationX() {
+		return accelerationX;
+	}
+	/**
+	 * Methode qui permet de modifier l'acceleration en X du projectile
+	 * @param accelerationX
+	 */
+	public void setAccelerationX(double accelerationX) {
+		this.accelerationX = accelerationX;
+	}
+	/**
+	 * Methode qui retourne l'acceleration en Y du projectile
+	 * @return
+	 */
+	public double getAccelerationY() {
+		return accelerationY;
+	}
+	/**
+	 * Methode qui permet de modifier l'acceleration en Y du projectile
+	 * @param accelerationY
+	 */
+	public void setAccelerationY(double accelerationY) {
+		this.accelerationY = accelerationY;
+	}
+	/**
+	 * Methode qui retourne la position en X du projectile
+	 * @return
+	 */
+	public double getPosX() {
+		return posX;
+	}
+	/**
+	 * Methode qui permet de modifier la position en X du projectile
+	 * @param posX
+	 */
+	public void setPosX(double posX) {
+		this.posX = posX;
+	}
+	/**
+	 * Methode qui retourne la position en Y du projectile
+	 * @return
+	 */
+	public double getPosY() {
+		return posY;
+	}
+	/**
+	 * Methode qui permet de modifier la position en Y du projectile
+	 * @param posY
+	 */
+	public void setPosY(double posY) {
+		this.posY = posY;
+	}
+
+	private void lireImage(){
+		try {
+			sProjectileBleu = ImageIO.read(getClass().getClassLoader().getResource("balleBleu.png"));	
+			sProjectileOrange = ImageIO.read(getClass().getClassLoader().getResource("balleOrange.png"));	
+			sProjectileRouge = ImageIO.read(getClass().getClassLoader().getResource("balleRouge.png"));	
+		} 
+		catch (IOException e) {
+			System.out.println("Erreur de lecture d'images");
+		}
+	}
+	/**
+	 * Methode qui retourne la charge du projectile
+	 * @return charge
+	 */
+	public double getCharge() {
+		// TODO Auto-generated method stub
+		return charge;
+	}
+
+}

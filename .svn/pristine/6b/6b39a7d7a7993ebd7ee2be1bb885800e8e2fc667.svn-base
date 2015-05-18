@@ -1,0 +1,63 @@
+package instructions;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.SystemColor;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+/**
+ * Classe utilisee pour afficher les instruction dans lorsque l'utilisateur en a besoin
+ * @author Jude
+ * @version 21/04/14
+ */
+public class Utilisation extends JPanel{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private Image canon1, canon2;
+	private JTextArea txtrGravitlectriqueEst_1;
+	
+	public Utilisation(){
+		setPreferredSize(new Dimension(1250,650));
+		setLayout(null);
+		ajouterLesInstructions();
+		txtrGravitlectriqueEst_1 = new JTextArea();
+	}
+	/**
+	 * Methode utilsee pour dessiner les composant du composant Instructions
+	 * @param Graphics g
+	 */
+	@Override
+	public void paintComponent(Graphics g){
+		super.paintComponent(g);
+		Graphics2D g2d = (Graphics2D) g;
+		g2d.drawImage(canon1,650,120,100,100,null);
+		g2d.drawImage(canon2,650,120,100,100,null);
+		txtrGravitlectriqueEst_1.setEditable(false);
+		txtrGravitlectriqueEst_1.setForeground(Color.WHITE);
+		txtrGravitlectriqueEst_1.setFont(new Font("Franklin Gothic Medium", Font.PLAIN, 21));
+		txtrGravitlectriqueEst_1.setBackground(SystemColor.activeCaptionBorder);
+		txtrGravitlectriqueEst_1.setText(" Gravit\u00E9 \u00E9lectrique est un jeu interactif qui permet \u00E0 l\u2019utilisateur d\u2019en apprendre plus sur la\r\n physique m\u00E9canique et \u00E9lectrique.  Les instructions qui concernent l\u2019utilisation de notre\r\n application est s\u00E9par\u00E9e en deux parties la premi\u00E8re concerne la fa\u00E7on dont l\u2019utilisateur joue \r\n et la seconde comment  l\u2019utilisateur doit utiliser l\u2019\u00E9diteur de niveaux");
+		txtrGravitlectriqueEst_1.setBounds(0, 0, 1233, 130);
+	}
+	private void ajouterLesInstructions(){
+		try {
+			canon1 = ImageIO.read(getClass().getClassLoader().getResource("Canon1.gif"));
+			canon2 = ImageIO.read(getClass().getClassLoader().getResource("Main2.gif"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	
+}

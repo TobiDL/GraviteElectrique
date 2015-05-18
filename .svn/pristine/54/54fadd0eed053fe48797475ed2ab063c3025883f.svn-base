@@ -1,0 +1,110 @@
+package objets.graphiques;
+
+import java.awt.Color;
+import java.awt.Graphics2D;
+
+import java.awt.Shape;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
+// image imports
+import java.io.IOException;
+import java.awt.Image;
+import javax.imageio.ImageIO;
+
+/**
+ * Classe de geometrie de la cible qui permet de determiner si on atteint la cible ou pas
+ * @author Edouard
+ * @version 14/02/14
+ */
+public class Cible {
+	private double posX, posY;
+	private double largeur,hauteur;
+	private Rectangle2D.Double rectCible,rectCibleOmbre;
+	private Image imageCible;
+	private Shape shape,sCible;
+
+	/**
+	 * Constructeur de la cible a une position entre en parametre 	
+	 * @param posX : position du canon en X (sur la longueur)
+	 * @param posY : position du canon en Y (sur la longueur)
+	 * @param largeur : largeur de la cible
+	 * @param largeur : largeurur de la cible
+	 */
+	public Cible(double posX,double posY, double largeur){
+		this.posX = posX;
+		this.posY = posY;
+		this.largeur = largeur;
+		hauteur = this.largeur/4;
+	}
+	/**
+	 * Dessine le canon 
+	 * @param g2d
+	 * @param matTransfo : matrice qui transforme les mesures en pixels en metres
+	 */
+	public void dessiner (Graphics2D g2d,AffineTransform matTransfo){
+		Color couleurTemp = g2d.getColor();		
+		rectCible = new Rectangle2D.Double(posX, posY, largeur, hauteur);
+		rectCibleOmbre = new Rectangle2D.Double(posX+7, posY+7, largeur, hauteur);
+		
+		g2d.setColor(new Color(0, 0, 0, 120));
+		g2d.fill(matTransfo.createTransformedShape(rectCibleOmbre));
+		
+		Shape rectCibleTransf = matTransfo.createTransformedShape(rectCible);
+		g2d.setColor(new Color(220,20,95,45));
+		g2d.fill(rectCibleTransf);			
+		lireLesImages();
+		g2d.drawImage(imageCible, (int)  rectCibleTransf.getBounds2D().getX() ,(int) rectCibleTransf.getBounds2D().getY(), (int)  rectCibleTransf.getBounds2D().getWidth(), (int)  rectCibleTransf.getBounds2D().getHeight(),null);
+		g2d.setColor(couleurTemp);
+
+	}
+	/**
+	 * methode creant les shapes pour les tests de collision 	
+	 * @param matTransfo : la matrice qui modifie les mesures en metres
+	 */
+	public void creer(AffineTransform matTransfo){
+		sCible=matTransfo.createTransformedShape(rectCible);
+		}
+	/**
+	 * Modifie la position de la cible 
+	 * @param posX et en posY	
+	 */
+	public void setPosition(double posX,double posY){
+		this.posX=posX;
+		this.posY=posY;		
+	}
+	/**
+	 * Retourne la shape de la cible 
+	 */
+	public Shape getShape(){
+		return sCible;
+	}
+	/**
+	 * Methode pour tester si un clic a ete fait sur la cible
+	 * @param posX : position en X de la cible
+	 * @param posY : position en Y de la cible
+	 * @return
+	 */
+	public boolean surLaCible(double posX, double posY, AffineTransform matTransfo){
+		if (matTransfo.createTransformedShape(rectCible).contains(posX,posY)){
+			return true;
+		}else{
+			return false;
+		}
+	}
+	public void setLargeur(double largeur){
+		this.largeur = largeur;
+		this.hauteur = this.largeur/4;
+		}
+	/**
+	 * Methode privee pour lire les images attachees au projet
+	 */
+
+	private void lireLesImages(){
+		try {
+			imageCible= ImageIO.read(getClass().getClassLoader().getResource("Texture_Cible.gif"));
+		} 
+		catch (IOException e) {
+			System.out.println("Erreur de lecture d'images");
+		}
+	}
+}

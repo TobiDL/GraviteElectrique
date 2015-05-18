@@ -1,0 +1,78 @@
+package interfaces.graphiques.autres;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
+import java.util.ArrayList;
+
+import javax.swing.JPanel;
+
+import barre.droite.ChoixDOptions;
+import obstacles.ObstacleElectrique;
+
+
+
+/**
+ * Classe graphique utilisee pour donner les opitions de depart a l'utilisateur qu'il choisira a l'aide des boutons
+ * @author Jude
+ * @version 04/03/14
+ */
+public class MenuDeDepart extends JPanel {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private ChoixDOptions copJouer,copEditeur;
+	private ArrayList<ObstacleElectrique> obsE;
+	/**
+	 * Constructeur du bouton
+	 */
+	public MenuDeDepart(){
+		setLayout(null);
+		setBackground(new Color(0,0,60));
+		setPreferredSize(new Dimension(944,562));
+		obsE = new ArrayList<ObstacleElectrique>();
+		ajouterDesObjets();
+		ajouterComposant();
+	}
+	
+	/**
+	 * Methode utilsee pour dessiner le menu
+	 * @param Graphics g
+	 */
+	@Override
+	public void paintComponent(Graphics g){
+		AffineTransform matTransfo = matriceMondeVersComposant(0,0,944,562);
+		super.paintComponent(g);
+		Graphics2D g2d = (Graphics2D) g;
+		if(!obsE.isEmpty()){
+			for(int k = 0; k < obsE.size();k++){
+				obsE.get(k).dessiner(g2d, matTransfo);
+			}
+		}
+	}
+	public void ajouterDesObjets(){
+		double i = Math.random()*30;
+		for(int k = 0; k < i ;k++){
+			ObstacleElectrique obstacle = new ObstacleElectrique(((int)(Math.random()*8)-4),Math.random()*944,Math.random()*562);
+			obsE.add(obstacle);
+		}
+	}
+	private void ajouterComposant() {	
+		
+	}
+	
+	private AffineTransform  matriceMondeVersComposant(double coinMondeX, double coinMondeY, double largeurMonde, double hauteurMonde) {
+		AffineTransform matTransfo =  new AffineTransform(); 
+
+		double pixelsParUniteX =  getWidth()/largeurMonde;
+		double pixelsParUniteY = getHeight()/hauteurMonde;
+
+		matTransfo.scale( pixelsParUniteX, pixelsParUniteY );
+		matTransfo.translate( -coinMondeX, -coinMondeY );
+
+		return (matTransfo);
+	}
+}

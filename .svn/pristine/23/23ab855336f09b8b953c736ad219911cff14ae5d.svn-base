@@ -1,0 +1,7 @@
+package composant.menu.depart;
+
+import java.util.EventListener;
+
+public interface ActionChoisieListener extends EventListener {
+	public void uneActionChoisie(TypeDAction action);
+}

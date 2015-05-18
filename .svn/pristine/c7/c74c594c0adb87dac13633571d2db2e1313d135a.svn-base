@@ -1,0 +1,468 @@
+
+
+package niveaux;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
+//import java.util.TreeSet;
+
+import javax.imageio.ImageIO;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+
+import objets.graphiques.Canon;
+import objets.graphiques.Cible;
+import obstacles.ObstacleElectrique;
+import obstacles.ObstaclePhysique;
+import barre.droite.ChoixDOptions;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseMotionAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseAdapter;
+import java.io.IOException;
+import java.util.ArrayList;
+
+import fenetres.ModifieurOP;
+
+/**
+ * Permet a l'utilisateur de créer un niveau qui sera par la suite jouable
+ * @author Jude
+ * 10/03/14
+ */
+public class EditeurDeNiveaux extends JPanel {
+	private final double LARGEUR_MONDE= 1100;
+	private final double HAUTEUR_MONDE= 600;
+	private static final long serialVersionUID = 1L;
+	private Niveaux niveau;
+	private ChoixDOptions choixDOptions;
+
+	private Canon canon;
+	private Cible cible;
+	private ArrayList<ObstacleElectrique> obstaclesElectriques;
+	private ObstacleElectrique obstacleElectriqueModel;
+	private ArrayList<ObstaclePhysique> obstaclesPhysiquesRond;
+	private ArrayList<ObstaclePhysique> obstaclesPhysiquesCarre;
+	private ObstaclePhysique obstaclePhysiqueCarre;
+	private ObstaclePhysique obstaclePhysiqueRond;
+	private Rectangle2D.Double barreGauche, poubelle;
+	private Image imagePoubelle;
+	private ModifieurOP modifieurOP;
+
+	private double posSourisX, posSourisY;
+	private double deplacementCanonX=0, deplacementCanonY=0;
+	private double deplacementCibleX=0, deplacementCibleY=0;
+	private double deplacementOPEX = 0 , deplacementOPEY = 0;
+	private double deplacementOEX = 0, deplacementOEY = 0;
+	private double posXCible = ((150/2)-(100/2)), posYCible=50;
+	private double posXCanon = ((150/2)-(100/2)), posYCanon=400;
+	private double largeurCible = 100;
+	private boolean surLeCanon=false, surLaCible=false, surUnOE=false, surUnOPR=false, surUnOPC = false;
+	private boolean surLaPoubelle = false;
+	private AffineTransform matTransfo; 
+	private int obsChoisit, obsPhys, obsPhys2;
+	private JButton boutonReset;
+	private JLabel lblCible, lblObsC, lblObsR, lblObsE, lblCanon;
+	protected double exCanon;
+	protected double eXCible;
+	protected double eYCible;
+	/**
+	 * Constructeur de l'editeur de niveau qui connait les mouvements de souris et le niveau qu'il cree
+	 */
+	public EditeurDeNiveaux(){
+
+		setBackground(Color.black);
+		setPreferredSize(new Dimension(1100,600));
+		setLayout(null);
+		ajouterLesEtiquettes();
+		niveau = new Niveaux();
+		obstaclesPhysiquesRond = new ArrayList<ObstaclePhysique>();
+		obstaclesPhysiquesCarre = new ArrayList<ObstaclePhysique>();
+		obstaclesElectriques = new ArrayList<ObstacleElectrique>();
+		matTransfo = matriceMondeVersComposant(0,0,HAUTEUR_MONDE*getWidth()/(double)getHeight(),HAUTEUR_MONDE);
+		obstacleElectriqueModel = new ObstacleElectrique(10,150/2, 330);
+		//	obstaclePhysiqueCarre = new ObstaclePhysique(100, 100/4, ((150/2)-(100/2)), 100,"verticale");
+		//obstaclePhysiqueRond = new ObstaclePhysique(50, ((150/2)-(100/2)), 150);
+		poubelle = new Rectangle2D.Double(1100-200, 500, 75,75);
+		lireImagePoubelle();
+		ecouteursAjoutes();
+		modifieurOP = new ModifieurOP();
+	}
+	/**
+	 * Methode utilsee pour dessiner la barre latterale gauche ainsi que les element qui seront presents sur l'interface
+	 */
+	@Override
+	public void paintComponent(Graphics g){
+		super.paintComponent(g);
+		Graphics2D g2d = (Graphics2D) g;
+		g2d.setColor(Color.white);
+		//	AffineTransform matTransfo = matriceMondeVersComposant(0,0,LARGEUR_MONDE,HAUTEUR_MONDE);
+		AffineTransform matTransfo = matriceMondeVersComposant(0,0,HAUTEUR_MONDE*getWidth()/(double)getHeight(),HAUTEUR_MONDE);	
+		barreGauche = new Rectangle2D.Double(0, 0, 150, getHeight());
+		g2d.drawImage(imagePoubelle,(int) poubelle.getX(), (int)poubelle.getY(),(int) poubelle.getWidth(), (int)poubelle.getHeight(),null);
+		g2d.fill(barreGauche);
+		g2d.setColor(Color.lightGray);
+		g2d.draw(barreGauche);
+		obstacleElectriqueModel.dessiner(g2d,matTransfo);
+
+		obstaclePhysiqueCarre = new ObstaclePhysique(100, 100/4, ((150/2)-(100/2)), 100,180);
+		obstaclePhysiqueCarre.dessiner(g2d, matTransfo);
+		obstaclePhysiqueRond = new ObstaclePhysique(50, ((150/2)-(100/2)), 150);
+		obstaclePhysiqueRond.dessiner(g2d, matTransfo);
+
+		if(!obstaclesElectriques.isEmpty()){
+			for (int k = 0; k < obstaclesElectriques.size();k++){
+				obstaclesElectriques.get(k).dessiner(g2d, matTransfo);
+			}
+		}
+		if(!obstaclesPhysiquesRond.isEmpty()){
+			for (int k = 0; k < obstaclesPhysiquesRond.size();k++){
+				obstaclesPhysiquesRond.get(k).dessiner(g2d, matTransfo);
+			}
+		}
+		if(!obstaclesPhysiquesCarre.isEmpty()){
+			for (int k = 0; k < obstaclesPhysiquesCarre.size();k++){
+				obstaclesPhysiquesCarre.get(k).dessiner(g2d, matTransfo);
+			}
+		}
+		cible = new Cible(posXCible + deplacementCibleX, posYCible + deplacementCibleY, largeurCible);
+		cible.dessiner(g2d, matTransfo);
+
+		canon = new Canon(0,posXCanon + deplacementCanonX,440);
+		canon.creer(matTransfo);
+		canon.dessiner(g2d, matTransfo);
+	}
+	/**
+	 * Methode privee pour ajouter les ecouteurs
+	 */
+	private void ecouteursAjoutes(){		
+		addMouseMotionListener(new MouseMotionAdapter() {
+			@Override
+			public void mouseDragged(MouseEvent arg0) {
+				matTransfo = matriceMondeVersComposant(0,0,HAUTEUR_MONDE*getWidth()/(double)getHeight(),HAUTEUR_MONDE);
+				if(surLeCanon){
+					deplacementCanonX = arg0.getX()-posSourisX-exCanon;
+					deplacementCanonY = arg0.getY()-posSourisY;
+				}
+				if(surLaCible){
+					surLaCible = true;
+					deplacementCibleX = arg0.getX()-posSourisX-eXCible;
+					deplacementCibleY = arg0.getY()-posSourisY-eYCible;
+				}
+				if(surUnOE){
+					if(!obstaclesElectriques.isEmpty()){
+						obstaclesElectriques.get(obsChoisit).setPosition(arg0.getX()-15,arg0.getY());
+						//aireObstacleElectrique = new Area(obstaclesElectriques.get(obsChoisit).getShape());
+					}
+				}
+				if(surUnOPR){
+					if(!obstaclesPhysiquesRond.isEmpty()){
+						obstaclesPhysiquesRond.get(obsPhys).setPosition(arg0.getX(), arg0.getY());
+						System.out.println(obsPhys);
+
+						//aireObstaclePhysique = new Area(obstaclesPhysiquesRond.get(obsPhys).getShape());
+					}
+				}
+				if(surUnOPC){
+					if(!obstaclesPhysiquesCarre.isEmpty()){
+						obstaclesPhysiquesCarre.get(obsPhys2).setPosition(arg0.getX(), arg0.getY());
+						//aireObstaclePhysique = new Area(obstaclesPhysiquesCarre.get(obsPhys2).getShape());
+					}
+				}
+				if(poubelle.contains(arg0.getX(), arg0.getY())){
+					System.out.println("Sur la poubelle");
+					surLaPoubelle = true;
+				}else{
+					surLaPoubelle = false;
+				}
+				repaint();
+			}
+		});
+		addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				posSourisX = e.getX();
+				posSourisY = e.getY();
+				matTransfo = matriceMondeVersComposant(0,0,HAUTEUR_MONDE*getWidth()/(double)getHeight(),HAUTEUR_MONDE);
+
+				if(canon.surLeCanon(e.getX(), e.getY())){
+					surLeCanon = true;
+					exCanon=deplacementCanonX;
+				}
+				if(cible.surLaCible(e.getX(), e.getY(),matTransfo)){
+					if(e.getButton()==1){
+						surLaCible = true;
+						eXCible=deplacementCibleX;
+						eYCible=deplacementCibleY;		
+					}else{
+						if(JOptionPane.showInputDialog("longeur de la cible")!= null);
+						largeurCible =Long.parseLong(JOptionPane.showInputDialog("Longeur de la cible"));
+					}
+				}
+				if(obstacleElectriqueModel.contains(e.getX(), e.getY(),matTransfo)){
+					surUnOE = true;
+					ObstacleElectrique oe = new ObstacleElectrique(100,e.getX(),e.getY());
+					obstaclesElectriques.add(oe);
+				}
+				if(obstaclePhysiqueRond.surLObstacle(e.getX(), e.getY(), matTransfo)){
+					surUnOPR = true;
+					ObstaclePhysique op = new ObstaclePhysique(50 ,e.getX(),e.getY());
+					obstaclesPhysiquesRond.add(op);
+					obsPhys = obstaclesPhysiquesRond.indexOf(op);
+				}
+				if(obstaclePhysiqueCarre.surLObstacle(e.getX(), e.getY(),matTransfo)){
+					surUnOPC = true;
+					ObstaclePhysique opc = new ObstaclePhysique(100, 100/4, e.getX(), e.getY(),90);
+					obstaclesPhysiquesCarre.add(opc);
+				}
+				if(!obstaclesElectriques.isEmpty()){
+					for(int k = 0 ; k < obstaclesElectriques.size(); k++){
+						if(obstaclesElectriques.get(k).contains(e.getX(), e.getY(),matTransfo)){
+							obsChoisit = k;
+							surUnOE = true;
+							if(e.getButton()==1){
+								if(e.getClickCount()==2){
+									obstaclesElectriques.get(k).setCharge(-obstaclesElectriques.get(k).getCharge());
+									repaint();
+								}
+							}else{
+								int charge = Integer.parseInt(JOptionPane.showInputDialog("Charge de l'obstacle \n De preference entre -10 et 10 "));
+								if(charge<10&&charge>-10){
+									obstaclesElectriques.get(obsChoisit).setCharge(charge);
+								}else{
+									JOptionPane.showMessageDialog(null, "Ta charge doit etre comprise entre 10 et -10 \n et doit etre entiere");
+								}
+								surUnOE = false;
+							}
+						}
+					}
+				}
+				if(!obstaclesPhysiquesRond.isEmpty()){
+					for(int k = 0 ; k < obstaclesPhysiquesRond.size(); k++){
+						if(obstaclesPhysiquesRond.get(k).surLObstacle(e.getX(), e.getY(),matTransfo)){
+							obsPhys = k;
+							surUnOPR = true;
+							if(e.getButton()==3){
+								double rayon =  Long.parseLong(JOptionPane.showInputDialog("Le Rayon de l'obstacle \n De preference entre 25 et 100"));
+								if(rayon<101&&rayon>24){
+									obstaclesPhysiquesRond.get(obsPhys).setRayon(rayon);
+								}else{
+									JOptionPane.showMessageDialog(null, "Ton rayon doit etre comprise entre 25 et 100 \n et doit etre entiere");
+								}								
+								surUnOPR = false;
+							}
+						}
+					}
+				}
+				if(!obstaclesPhysiquesCarre.isEmpty()){
+					for(int k = 0 ; k < obstaclesPhysiquesCarre.size(); k++){
+						if(obstaclesPhysiquesCarre.get(k).surLObstacle(e.getX(), e.getY(),matTransfo)){
+							obsPhys2 = k;
+							surUnOPC = true;
+							if(e.getButton()==3){
+								//if(!modifieurOP.isEnabled()){
+								//	modifieurOP.setEnabled(true);
+									// hauteur
+									double hauteur= Long.parseLong(JOptionPane.showInputDialog("Hauteur \n De preference entre 25 et 250"));
+									//obstaclesPhysiquesCarre.get(obsPhys2).setHauteur(hauteur);									
+									if(hauteur<251&&hauteur>24){
+										obstaclesPhysiquesCarre.get(obsPhys2).setHauteur(hauteur);
+									}else{
+										JOptionPane.showMessageDialog(null, "La hauteur doit etre comprise entre 25 et 250 \n et doit etre entiere", "Error", JOptionPane.ERROR_MESSAGE);
+									}
+									// longueur
+									double longueur= Long.parseLong(JOptionPane.showInputDialog("Largeur \n De preference entre 25 et 250"));
+									if(longueur<251&&longueur>24){
+										obstaclesPhysiquesCarre.get(obsPhys2).setLongueur(longueur);
+									}else{
+										JOptionPane.showMessageDialog(null, "La longueur doit etre comprise entre 25 et 250 \n et doit etre entiere" ,"Error", JOptionPane.ERROR_MESSAGE);
+									}									
+									
+									//obstaclesPhysiquesCarre.get(obsPhys2).setLongueur(longueur);
+
+									//obstaclesPhysiquesCarre.get(obsPhys2).setHauteur(modifieurOP.getHauteur());
+									//obstaclesPhysiquesCarre.get(obsPhys2).setLongueur(modifieurOP.getLargeur());
+								//}
+									surUnOPC = false;
+							}
+						}
+					}
+
+				}
+
+			}
+			@Override
+			public void mouseReleased(MouseEvent arg0) {
+				if(surLaPoubelle){
+					if(surLeCanon){
+						deplacementCanonX = 0;
+						deplacementCanonY = 0;	
+						posXCanon = ((150/2)-(100/2));
+						
+					}
+					if(surLaCible){
+						deplacementCibleX = 0;
+						deplacementCibleY = 0;
+						posXCible = ((150/2)-(100/2));
+						posYCible=50;
+					}
+					if(surUnOE){
+						obstaclesElectriques.remove(obsChoisit);
+					}
+					if(surUnOPR){
+						obstaclesPhysiquesRond.remove(obsPhys);
+					}
+					if(surUnOPC){
+						obstaclesPhysiquesCarre.remove(obsPhys2);
+					}
+				}
+				if(surLeCanon){
+					surLeCanon = false;
+					posXCanon = posXCanon + deplacementCanonX;
+					posYCanon = posYCanon + deplacementCanonY;
+					deplacementCanonX = 0;
+					deplacementCanonY = 0;	
+				}
+				if(surLaCible){
+					surLaCible = false;
+					posXCible = posXCible + deplacementCibleX;
+					posYCible = posYCible + deplacementCibleY;
+					deplacementCibleX = 0;
+					deplacementCibleY = 0;
+				}
+				surLaCible = false;
+				surLeCanon = false;
+				surUnOE = false;
+				surUnOPR = false;
+				surUnOPC = false;
+			}
+		});
+	}
+	/**
+	 * Methode permettant de reatablir ou de reinitinaliser les parametres de lediteur de niveaux
+	 */
+	private void reset(){
+		deplacementCanonX=0;
+		deplacementCanonY=0;
+		deplacementCibleX=0;
+		deplacementCibleY=0;
+		posXCible = ((150/2)-(100/2));
+		posYCible=50;
+		posXCanon = ((150/2)-(100/2));
+		posYCanon=400;
+		largeurCible = 100;
+		obstaclesPhysiquesRond.clear();
+		obstaclesPhysiquesCarre.clear();
+		obstaclesElectriques.clear();
+		repaint();
+	}
+	/**
+	 * Methode qui permet de savoir si un niveau est pret a etre joue
+	 * @return retourne une valeur boolenne
+	 */
+	public boolean estPret(){
+		if (posXCanon<150||posXCible<150){
+			return false;
+		}else{
+			return true;
+		}
+	}
+	/**
+	 * Methode utilisee pour creer un objet de type Niveaux apartir des modifications faites avec l'editeur
+	 * @return niveau : le niveau cree 
+	 */
+	public Niveaux getNiveau(){
+		niveau.ajouterCanon(0, posXCanon);
+		niveau.ajouterlaCible(posXCible, posYCible, largeurCible);
+		if(!obstaclesElectriques.isEmpty()){
+			for(int k = 0 ; k < obstaclesElectriques.size();k++){
+				niveau.ajouterUnObstacleElectrique(obstaclesElectriques.get(k));
+			}
+		}
+		if(!obstaclesPhysiquesRond.isEmpty()){
+			for(int k = 0 ; k < obstaclesPhysiquesRond.size();k++){
+				niveau.ajouterUnObstaclePhysique(obstaclesPhysiquesRond.get(k));
+			}
+
+		}
+		if(!obstaclesPhysiquesCarre.isEmpty()){
+			for(int k = 0 ; k < obstaclesPhysiquesCarre.size();k++){
+				niveau.ajouterUnObstaclePhysique(obstaclesPhysiquesCarre.get(k));
+			}
+		}
+		niveau.setBounds(0, 0, 1100, 600);
+		return niveau;
+	}
+	/**
+	 * Methode privee utilisee pour lire l'image de la poubelle
+	 */
+	private void lireImagePoubelle(){
+		try {
+			imagePoubelle = ImageIO.read(getClass().getClassLoader().getResource("poubelle.png"));
+
+		} 
+		catch (IOException e) {
+			System.out.println("Erreur de lecture d'images");
+		}
+	}
+	/**
+	 * Methode privee utilisee pour ajouter les etiquettes et le bouton reset
+	 */
+	private void ajouterLesEtiquettes(){
+
+		lblCible = new JLabel("Cible");
+		lblCible.setBounds(5, 10, 60, 60);
+		add(lblCible);
+		lblCanon = new JLabel("Canon");
+		lblCanon.setBounds(5, 390, 150, 60);
+		add(lblCanon);
+		lblObsE = new JLabel("Obstacle Electrique");
+		lblObsE.setBounds(5, 240, 150, 60);
+		add(lblObsE);
+		lblObsR = new JLabel("Obstacle Physique Rond");
+		lblObsR.setBounds(5, 110, 150, 60);
+		add(lblObsR);
+		lblObsC = new JLabel("Obstacle Physique Carre");
+		lblObsC.setBounds(5, 60, 150, 60);
+		add(lblObsC);
+		boutonReset = new JButton("Reset");
+		boutonReset.setBounds(5,530,140,50);
+		boutonReset.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				reset();
+				niveau.retablir();
+				niveau.repaint();
+			}
+		});
+		add(boutonReset);
+	}
+	/**
+	 * Classe utilisee pour transformer les mesures de pixels vers des mesures en monde reel
+	 * @param coinMondeX
+	 * @param coinMondeY
+	 * @param largeurMonde
+	 * @param hauteurMonde
+	 * @return
+	 */
+	private AffineTransform  matriceMondeVersComposant(double coinMondeX, double coinMondeY, double largeurMonde, double hauteurMonde) {
+		AffineTransform matTransfo =  new AffineTransform(); 
+
+		double pixelsParUniteX =  getWidth()/largeurMonde;
+		double pixelsParUniteY = getHeight()/hauteurMonde;
+
+		matTransfo.scale( pixelsParUniteX, pixelsParUniteY );
+		matTransfo.translate( -coinMondeX, -coinMondeY );
+
+		return (matTransfo);
+	}
+
+}

@@ -1,0 +1,10 @@
+package barre.droite;
+
+/**
+ * Liste des  choix possibles pour le composant
+ * @author Jude
+ * 10/03/14
+ */
+public enum TypeDOption {
+	QUITTER,RETOUR,JOUER,REINITIALISER, AIDE;
+}
